@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import {
-  Search,
   Trash2,
   CreditCard,
   Plus,
@@ -11,6 +10,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { formatCurrency, formatNumber } from "../lib/utils";
+import { toast } from "sonner";
 
 interface Item {
   id: string;
@@ -111,14 +111,14 @@ export default function POSInterface() {
 
     // Check if it's a physical product that needs stock tracking
     if (!item.isService && item.stock <= 0) {
-      alert("Item out of stock!");
+      toast.error("Item out of stock!");
       return;
     }
 
     const existingItem = cart.find((cartItem) => cartItem.id === itemId);
     if (existingItem) {
       if (!item.isService && existingItem.quantity >= item.stock) {
-        alert("Not enough stock available!");
+        toast.error("Not enough stock available!");
         return;
       }
       setCart(
@@ -157,7 +157,7 @@ export default function POSInterface() {
     }
 
     if (item && !item.isService && newQuantity > item.stock) {
-      alert("Not enough stock available!");
+      toast.error("Not enough stock available!");
       return;
     }
 
@@ -210,7 +210,7 @@ export default function POSInterface() {
 
   const addNewCustomer = async () => {
     if (!newCustomer.name || !newCustomer.phone) {
-      alert("Please fill in name and phone fields");
+      toast.error("Please fill in name and phone fields");
       return;
     }
 
@@ -235,14 +235,14 @@ export default function POSInterface() {
           address: "",
           dateOfBirth: "",
         });
-        alert("Customer added successfully!");
+        toast.success("Customer added successfully!");
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error creating customer:", error);
-      alert("Error creating customer. Please try again.");
+      toast.error("Error creating customer. Please try again.");
     }
   };
 
@@ -255,7 +255,7 @@ export default function POSInterface() {
 
   const checkout = async () => {
     if (cart.length === 0) {
-      alert("Cart is empty!");
+      toast.error("Cart is empty!");
       return;
     }
 
@@ -286,16 +286,16 @@ export default function POSInterface() {
       });
 
       if (response.ok) {
-        alert("Sale completed successfully!");
+        toast.success("Sale completed successfully!");
         clearCart();
         fetchData(); // Refresh data to update stock
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error during checkout:", error);
-      alert("Error during checkout. Please try again.");
+      toast.error("Error during checkout. Please try again.");
     }
   };
 

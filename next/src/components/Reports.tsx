@@ -17,6 +17,7 @@ import {
   Search,
 } from "lucide-react";
 import { formatCurrency, formatNumber, formatPercentage } from "../lib/utils";
+import { toast } from "sonner";
 
 interface ItemSalesData extends Record<string, unknown> {
   id: string;
@@ -311,7 +312,7 @@ export default function Reports() {
       ]);
     } catch (error) {
       console.error("Error generating report:", error);
-      alert("Error generating report. Please try again.");
+      toast.error("Error generating report. Please try again.");
     } finally {
       setLoading(false);
     }

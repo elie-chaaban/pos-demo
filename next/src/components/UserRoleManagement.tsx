@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Users } from "lucide-react";
 import { formatNumber } from "../lib/utils";
+import { toast } from "sonner";
 
 interface UserRole {
   id: string;
@@ -77,11 +78,11 @@ export default function UserRoleManagement() {
         });
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error saving user role:", error);
-      alert("Error saving user role. Please try again.");
+      toast.error("Error saving user role. Please try again.");
     }
   };
 
@@ -95,8 +96,19 @@ export default function UserRoleManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this user role?")) return;
+    toast("Are you sure you want to delete this user role?", {
+      action: {
+        label: "Delete",
+        onClick: () => performDelete(id),
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  };
 
+  const performDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/user-roles/${id}`, {
         method: "DELETE",
@@ -106,11 +118,11 @@ export default function UserRoleManagement() {
         await fetchUserRoles();
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error deleting user role:", error);
-      alert("Error deleting user role. Please try again.");
+      toast.error("Error deleting user role. Please try again.");
     }
   };
 

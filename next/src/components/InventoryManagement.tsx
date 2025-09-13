@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Package } from "lucide-react";
 import { formatCurrency, formatNumber } from "../lib/utils";
+import { toast } from "sonner";
 
 interface InventoryRecord {
   id: string;
@@ -119,11 +120,11 @@ export default function InventoryManagement() {
         });
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error saving inventory record:", error);
-      alert("Error saving inventory record. Please try again.");
+      toast.error("Error saving inventory record. Please try again.");
     }
   };
 
@@ -140,9 +141,19 @@ export default function InventoryManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this inventory record?"))
-      return;
+    toast("Are you sure you want to delete this inventory record?", {
+      action: {
+        label: "Delete",
+        onClick: () => performDelete(id),
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  };
 
+  const performDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/inventory/${id}`, {
         method: "DELETE",
@@ -153,11 +164,11 @@ export default function InventoryManagement() {
         await fetchItems(); // Refresh items to update stock
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error deleting inventory record:", error);
-      alert("Error deleting inventory record. Please try again.");
+      toast.error("Error deleting inventory record. Please try again.");
     }
   };
 

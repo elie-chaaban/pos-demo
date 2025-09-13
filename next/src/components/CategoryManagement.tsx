@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { formatNumber } from "../lib/utils";
+import { toast } from "sonner";
 
 interface UserRole {
   id: string;
@@ -97,11 +98,11 @@ export default function CategoryManagement() {
         });
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error saving category:", error);
-      alert("Error saving category. Please try again.");
+      toast.error("Error saving category. Please try again.");
     }
   };
 
@@ -118,8 +119,19 @@ export default function CategoryManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this category?")) return;
+    toast("Are you sure you want to delete this category?", {
+      action: {
+        label: "Delete",
+        onClick: () => performDelete(id),
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  };
 
+  const performDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/categories/${id}`, {
         method: "DELETE",
@@ -129,11 +141,11 @@ export default function CategoryManagement() {
         await fetchData();
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error deleting category:", error);
-      alert("Error deleting category. Please try again.");
+      toast.error("Error deleting category. Please try again.");
     }
   };
 

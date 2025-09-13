@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { formatCurrency, formatNumber } from "../lib/utils";
+import { toast } from "sonner";
 
 interface Item {
   id: string;
@@ -98,11 +99,11 @@ export default function ItemManagement() {
         });
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error saving item:", error);
-      alert("Error saving item. Please try again.");
+      toast.error("Error saving item. Please try again.");
     }
   };
 
@@ -120,8 +121,19 @@ export default function ItemManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this item?")) return;
+    toast("Are you sure you want to delete this item?", {
+      action: {
+        label: "Delete",
+        onClick: () => performDelete(id),
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  };
 
+  const performDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/items/${id}`, {
         method: "DELETE",
@@ -131,11 +143,11 @@ export default function ItemManagement() {
         await fetchItems();
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error deleting item:", error);
-      alert("Error deleting item. Please try again.");
+      toast.error("Error deleting item. Please try again.");
     }
   };
 

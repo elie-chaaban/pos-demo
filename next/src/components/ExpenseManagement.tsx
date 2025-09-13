@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { formatCurrency, formatNumber } from "../lib/utils";
+import { toast } from "sonner";
 
 interface Expense {
   id: string;
@@ -97,11 +98,11 @@ export default function ExpenseManagement() {
         });
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error saving expense:", error);
-      alert("Error saving expense. Please try again.");
+      toast.error("Error saving expense. Please try again.");
     }
   };
 
@@ -119,8 +120,19 @@ export default function ExpenseManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this expense?")) return;
+    toast("Are you sure you want to delete this expense?", {
+      action: {
+        label: "Delete",
+        onClick: () => performDelete(id),
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  };
 
+  const performDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/expenses/${id}`, {
         method: "DELETE",
@@ -130,11 +142,11 @@ export default function ExpenseManagement() {
         await fetchExpenses();
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error deleting expense:", error);
-      alert("Error deleting expense. Please try again.");
+      toast.error("Error deleting expense. Please try again.");
     }
   };
 

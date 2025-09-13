@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { formatNumber } from "../lib/utils";
+import { toast } from "sonner";
 
 interface Customer {
   id: string;
@@ -72,11 +73,11 @@ export default function CustomerManagement() {
         });
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error saving customer:", error);
-      alert("Error saving customer. Please try again.");
+      toast.error("Error saving customer. Please try again.");
     }
   };
 
@@ -93,8 +94,19 @@ export default function CustomerManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this customer?")) return;
+    toast("Are you sure you want to delete this customer?", {
+      action: {
+        label: "Delete",
+        onClick: () => performDelete(id),
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  };
 
+  const performDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/customers/${id}`, {
         method: "DELETE",
@@ -104,11 +116,11 @@ export default function CustomerManagement() {
         await fetchCustomers();
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error deleting customer:", error);
-      alert("Error deleting customer. Please try again.");
+      toast.error("Error deleting customer. Please try again.");
     }
   };
 

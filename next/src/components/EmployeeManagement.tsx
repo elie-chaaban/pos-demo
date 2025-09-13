@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { formatNumber } from "../lib/utils";
+import { toast } from "sonner";
 
 interface UserRole {
   id: string;
@@ -93,11 +94,11 @@ export default function EmployeeManagement() {
         });
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error saving employee:", error);
-      alert("Error saving employee. Please try again.");
+      toast.error("Error saving employee. Please try again.");
     }
   };
 
@@ -113,8 +114,19 @@ export default function EmployeeManagement() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this employee?")) return;
+    toast("Are you sure you want to delete this employee?", {
+      action: {
+        label: "Delete",
+        onClick: () => performDelete(id),
+      },
+      cancel: {
+        label: "Cancel",
+        onClick: () => {},
+      },
+    });
+  };
 
+  const performDelete = async (id: string) => {
     try {
       const response = await fetch(`/api/employees/${id}`, {
         method: "DELETE",
@@ -124,11 +136,11 @@ export default function EmployeeManagement() {
         await fetchData();
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error}`);
+        toast.error(`Error: ${error.error}`);
       }
     } catch (error) {
       console.error("Error deleting employee:", error);
-      alert("Error deleting employee. Please try again.");
+      toast.error("Error deleting employee. Please try again.");
     }
   };
 
