@@ -128,21 +128,18 @@ async function main() {
     {
       id: "cat4",
       name: "Nail Services",
-      commissionRate: 0,
       salonOwnerRate: 100,
       description: "All nail services: manicure, pedicure, nail art, etc.",
     },
     {
       id: "cat5",
       name: "Nail Products",
-      commissionRate: 0,
       salonOwnerRate: 100,
       description: "Nail polish, nail art supplies, nail care products, etc.",
     },
     {
       id: "cat6",
       name: "Face Treatments",
-      commissionRate: 0,
       salonOwnerRate: 100,
       description: "Face masks, facial treatments, skincare services, etc.",
     },
@@ -213,35 +210,30 @@ async function main() {
       name: "Gilbert Atallah",
       email: "gilbert@ddsalon.com",
       phone: "555-0101",
-      commissionRate: 0,
     },
     {
       id: "emp2",
       name: "elie",
       email: "eliech@ddsalon.com",
       phone: "555-0102",
-      commissionRate: 0,
     },
     {
       id: "emp3",
       name: "Sarah Johnson",
       email: "sarah@ddsalon.com",
       phone: "555-0103",
-      commissionRate: 0,
     },
     {
       id: "emp4",
       name: "Mike Chen",
       email: "mike@ddsalon.com",
       phone: "555-0104",
-      commissionRate: 0,
     },
     {
       id: "emp5",
       name: "Lisa Rodriguez",
       email: "lisa@ddsalon.com",
       phone: "555-0105",
-      commissionRate: 0,
     },
   ];
 

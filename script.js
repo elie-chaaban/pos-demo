@@ -305,14 +305,12 @@ class POSSystem {
         {
           id: "cat4",
           name: "Nail Services",
-          commissionRate: 0,
           description: "All nail services: manicure, pedicure, nail art, etc.",
           salonOwnerRate: 100,
         },
         {
           id: "cat5",
           name: "Nail Products",
-          commissionRate: 0,
           description:
             "Nail polish, nail art supplies, nail care products, etc.",
           salonOwnerRate: 100,
@@ -320,7 +318,6 @@ class POSSystem {
         {
           id: "cat6",
           name: "Face Treatments",
-          commissionRate: 0,
           description: "Face masks, facial treatments, skincare services, etc.",
           salonOwnerRate: 100,
         },
@@ -385,7 +382,6 @@ class POSSystem {
           email: "gilbert@salon.com",
           phone: "555-0101",
           role: "Hairdresser",
-          commissionRate: 0,
         },
         {
           id: "emp2",
@@ -393,7 +389,6 @@ class POSSystem {
           email: "elie@salon.com",
           phone: "555-0102",
           role: "Salon Owner",
-          commissionRate: 0,
         },
         {
           id: "emp3",
@@ -401,7 +396,6 @@ class POSSystem {
           email: "sarah@salon.com",
           phone: "555-0103",
           role: "Nail Technician",
-          commissionRate: 0,
         },
         {
           id: "emp4",
@@ -409,7 +403,6 @@ class POSSystem {
           email: "maria@salon.com",
           phone: "555-0104",
           role: "Nail Technician",
-          commissionRate: 0,
         },
         {
           id: "emp5",
@@ -417,7 +410,6 @@ class POSSystem {
           email: "lisa@salon.com",
           phone: "555-0105",
           role: "Nail Technician",
-          commissionRate: 0,
         },
         {
           id: "emp6",
@@ -425,7 +417,6 @@ class POSSystem {
           email: "emma@salon.com",
           phone: "555-0106",
           role: "Nail Technician",
-          commissionRate: 0,
         },
       ];
       this.saveData("employees", this.employees);
@@ -693,7 +684,6 @@ class POSSystem {
                 <td>${employee.email}</td>
                 <td>${employee.phone}</td>
                 <td>${employee.role}</td>
-                <td>${employee.commissionRate}%</td>
                 <td>
                     <button class="btn btn-sm btn-primary" onclick="pos.editEmployee('${employee.id}')">
                         <i class="fas fa-edit"></i>
@@ -1391,12 +1381,6 @@ class POSSystem {
                      </select>
                  </div>
                 <div class="form-group">
-                    <label for="employeeCommission">Commission Rate (%):</label>
-                    <input type="number" id="employeeCommission" class="form-input" value="${
-                      employee ? employee.commissionRate : 0
-                    }" min="0" max="100" step="0.1">
-                </div>
-                <div class="form-group">
                     <button type="submit" class="btn btn-primary">${
                       employee ? "Update" : "Add"
                     } Employee</button>
@@ -1418,9 +1402,6 @@ class POSSystem {
     const email = document.getElementById("employeeEmail").value;
     const phone = document.getElementById("employeePhone").value;
     const role = document.getElementById("employeeRole").value;
-    const commissionRate = parseFloat(
-      document.getElementById("employeeCommission").value
-    );
 
     if (employeeId) {
       const employee = this.employees.find((e) => e.id === employeeId);
@@ -1428,7 +1409,6 @@ class POSSystem {
       employee.email = email;
       employee.phone = phone;
       employee.role = role;
-      employee.commissionRate = commissionRate;
     } else {
       this.employees.push({
         id: this.generateId(),
@@ -1436,7 +1416,6 @@ class POSSystem {
         email,
         phone,
         role,
-        commissionRate,
       });
     }
 

@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, roleIds, commissionRate } = body;
+    const { name, email, phone, roleIds } = body;
 
     if (
       !name ||
@@ -47,7 +47,6 @@ export async function POST(request: NextRequest) {
         name,
         email,
         phone,
-        commissionRate: commissionRate || 0,
         employeeRoles: {
           create: roleIds.map((roleId: string) => ({
             roleId,

@@ -40,7 +40,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { name, email, phone, roleIds, commissionRate } = body;
+    const { name, email, phone, roleIds } = body;
 
     if (
       !name ||
@@ -64,7 +64,6 @@ export async function PUT(
           name,
           email,
           phone,
-          commissionRate: commissionRate || 0,
         },
       });
 

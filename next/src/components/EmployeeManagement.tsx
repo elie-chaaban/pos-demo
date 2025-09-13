@@ -14,7 +14,6 @@ interface Employee {
   name: string;
   email: string;
   phone: string;
-  commissionRate: number;
   employeeRoles: Array<{
     id: string;
     role: UserRole;
@@ -32,7 +31,6 @@ export default function EmployeeManagement() {
     email: "",
     phone: "",
     selectedRoleIds: [] as string[],
-    commissionRate: 0,
   });
 
   useEffect(() => {
@@ -72,7 +70,6 @@ export default function EmployeeManagement() {
         email: formData.email,
         phone: formData.phone,
         roleIds: formData.selectedRoleIds,
-        commissionRate: formData.commissionRate,
       };
 
       const response = await fetch(url, {
@@ -92,7 +89,6 @@ export default function EmployeeManagement() {
           email: "",
           phone: "",
           selectedRoleIds: [],
-          commissionRate: 0,
         });
       } else {
         const error = await response.json();
@@ -111,7 +107,6 @@ export default function EmployeeManagement() {
       email: employee.email,
       phone: employee.phone,
       selectedRoleIds: employee.employeeRoles.map((er) => er.role.id),
-      commissionRate: employee.commissionRate,
     });
     setShowModal(true);
   };
@@ -143,7 +138,6 @@ export default function EmployeeManagement() {
       email: "",
       phone: "",
       selectedRoleIds: [],
-      commissionRate: 0,
     });
     setShowModal(true);
   };
@@ -156,7 +150,6 @@ export default function EmployeeManagement() {
       email: "",
       phone: "",
       selectedRoleIds: [],
-      commissionRate: 0,
     });
   };
 
@@ -315,12 +308,6 @@ export default function EmployeeManagement() {
                     {employee.phone}
                   </span>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span className="text-gray-600 font-medium">
-                    {employee.commissionRate}% Commission
-                  </span>
-                </div>
               </div>
             </div>
           );
@@ -458,27 +445,6 @@ export default function EmployeeManagement() {
                 <p className="text-sm text-gray-500 mt-2">
                   Select one or more roles for this employee
                 </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Commission Rate (%)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  value={formData.commissionRate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      commissionRate: parseFloat(e.target.value) || 0,
-                    })
-                  }
-                  className="input-modern"
-                  placeholder="0.0"
-                />
               </div>
 
               <div className="flex space-x-4 pt-4">
