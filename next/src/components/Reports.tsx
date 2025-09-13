@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react";
 import {
   RefreshCw,
-  Receipt,
   TrendingUp,
   DollarSign,
   Package,
   CreditCard,
+  Users,
+  Clock,
+  BarChart3,
 } from "lucide-react";
 
 interface ReportData {
@@ -38,6 +40,37 @@ interface ReportData {
         salonOwnerShare: number;
       }
     >;
+    // Advanced analytics
+    hourlyTrends: Record<
+      string,
+      {
+        hour: number;
+        sales: number;
+        transactions: number;
+      }
+    >;
+    customerAnalytics: {
+      totalCustomers: number;
+      repeatCustomers: number;
+      newCustomers: number;
+      averageOrderValue: number;
+      topCustomers: Array<{
+        id: string;
+        name: string;
+        totalSpent: number;
+        transactionCount: number;
+      }>;
+    };
+    profitMargins: {
+      grossProfit: number;
+      netProfit: number;
+      profitMargin: number;
+    };
+    transactionMetrics: {
+      totalTransactions: number;
+      averageTransactionValue: number;
+      itemsPerTransaction: number;
+    };
   };
   expenses?: {
     totalExpenses: number;
@@ -84,17 +117,35 @@ export default function Reports() {
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [loading, setLoading] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState("today");
+  const [customDateRange, setCustomDateRange] = useState({
+    startDate: "",
+    endDate: "",
+  });
+  const [useCustomRange, setUseCustomRange] = useState(false);
 
   useEffect(() => {
     generateReport();
-  }, [selectedPeriod]);
+  }, [
+    selectedPeriod,
+    useCustomRange,
+    customDateRange.startDate,
+    customDateRange.endDate,
+  ]);
 
   const generateReport = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        `/api/reports?period=${selectedPeriod}&type=all`
-      );
+      let url = `/api/reports?period=${selectedPeriod}&type=all`;
+
+      if (
+        useCustomRange &&
+        customDateRange.startDate &&
+        customDateRange.endDate
+      ) {
+        url += `&startDate=${customDateRange.startDate}&endDate=${customDateRange.endDate}`;
+      }
+
+      const response = await fetch(url);
       const data = await response.json();
       setReportData(data);
     } catch (error) {
@@ -103,11 +154,6 @@ export default function Reports() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const testInvoice = () => {
-    // This would generate a test invoice - placeholder for now
-    alert("Test invoice functionality would be implemented here");
   };
 
   const formatCurrency = (amount: number) => {
@@ -137,14 +183,47 @@ export default function Reports() {
           <div className="flex flex-col sm:flex-row gap-3">
             <select
               value={selectedPeriod}
-              onChange={(e) => setSelectedPeriod(e.target.value)}
+              onChange={(e) => {
+                setSelectedPeriod(e.target.value);
+                setUseCustomRange(e.target.value === "custom");
+              }}
               className="input-modern min-w-[150px]"
             >
               <option value="today">Today</option>
               <option value="week">This Week</option>
               <option value="month">This Month</option>
               <option value="year">This Year</option>
+              <option value="custom">Custom Range</option>
             </select>
+
+            {useCustomRange && (
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  value={customDateRange.startDate}
+                  onChange={(e) =>
+                    setCustomDateRange((prev) => ({
+                      ...prev,
+                      startDate: e.target.value,
+                    }))
+                  }
+                  className="input-modern"
+                  placeholder="Start Date"
+                />
+                <input
+                  type="date"
+                  value={customDateRange.endDate}
+                  onChange={(e) =>
+                    setCustomDateRange((prev) => ({
+                      ...prev,
+                      endDate: e.target.value,
+                    }))
+                  }
+                  className="input-modern"
+                  placeholder="End Date"
+                />
+              </div>
+            )}
             <button
               onClick={generateReport}
               disabled={loading}
@@ -154,13 +233,6 @@ export default function Reports() {
                 className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
               />
               <span>Generate Report</span>
-            </button>
-            <button
-              onClick={testInvoice}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              <Receipt className="w-5 h-5" />
-              <span>Test Invoice</span>
             </button>
           </div>
         </div>
@@ -221,7 +293,7 @@ export default function Reports() {
                 <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
                   <div className="flex items-center justify-between mb-2">
                     <div className="text-sm text-green-600 font-semibold">
-                      Employee Earnings
+                      Total Employee Commission
                     </div>
                     <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
@@ -317,6 +389,277 @@ export default function Reports() {
                       </div>
                     )
                   )}
+                </div>
+              </div>
+            )}
+
+          {/* Modern Category Performance Section */}
+          {reportData.revenue &&
+            Object.keys(reportData.revenue.byCategory).length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Category Performance
+                    </h3>
+                    <p className="text-gray-600">
+                      Revenue and commission breakdown by service/product
+                      category
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Object.values(reportData.revenue.byCategory).map(
+                    (category, index) => (
+                      <div key={index} className="modern-card p-6 hover-lift">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-lg">
+                              {category.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-purple-600">
+                              {formatCurrency(category.totalSales)}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              Total Sales
+                            </div>
+                          </div>
+                        </div>
+
+                        <h4 className="text-xl font-bold text-gray-900 mb-4">
+                          {category.name}
+                        </h4>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600 font-medium">
+                              Employee Commission:
+                            </span>
+                            <span className="font-bold text-green-600">
+                              {formatCurrency(category.employeeCommission)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600 font-medium">
+                              Salon Owner Share:
+                            </span>
+                            <span className="font-bold text-blue-600">
+                              {formatCurrency(category.salonOwnerShare)}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600 font-medium">
+                              Commission Rate:
+                            </span>
+                            <span className="font-bold text-indigo-600">
+                              {category.totalSales > 0
+                                ? (
+                                    (category.employeeCommission /
+                                      category.totalSales) *
+                                    100
+                                  ).toFixed(1)
+                                : 0}
+                              %
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+
+          {/* Advanced Analytics Section */}
+          {reportData.revenue && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Customer Analytics */}
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center mr-4">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Customer Analytics
+                    </h3>
+                    <p className="text-gray-600">
+                      Customer behavior and loyalty insights
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-sm text-blue-600 font-medium">
+                        Total Customers
+                      </div>
+                      <div className="text-2xl font-bold text-blue-900">
+                        {reportData.revenue.customerAnalytics.totalCustomers}
+                      </div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-sm text-green-600 font-medium">
+                        Repeat Customers
+                      </div>
+                      <div className="text-2xl font-bold text-green-900">
+                        {reportData.revenue.customerAnalytics.repeatCustomers}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="text-sm text-purple-600 font-medium">
+                        New Customers
+                      </div>
+                      <div className="text-2xl font-bold text-purple-900">
+                        {reportData.revenue.customerAnalytics.newCustomers}
+                      </div>
+                    </div>
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <div className="text-sm text-orange-600 font-medium">
+                        Avg Order Value
+                      </div>
+                      <div className="text-2xl font-bold text-orange-900">
+                        {formatCurrency(
+                          reportData.revenue.customerAnalytics.averageOrderValue
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {reportData.revenue.customerAnalytics.topCustomers.length >
+                    0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                        Top Customers
+                      </h4>
+                      <div className="space-y-2">
+                        {reportData.revenue.customerAnalytics.topCustomers.map(
+                          (customer) => (
+                            <div
+                              key={customer.id}
+                              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                            >
+                              <div>
+                                <div className="font-medium text-gray-900">
+                                  {customer.name}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {customer.transactionCount} transactions
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-bold text-gray-900">
+                                  {formatCurrency(customer.totalSpent)}
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Transaction Metrics */}
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+                    <BarChart3 className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Transaction Metrics
+                    </h3>
+                    <p className="text-gray-600">
+                      Sales performance and efficiency metrics
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-indigo-50 p-4 rounded-lg">
+                      <div className="text-sm text-indigo-600 font-medium">
+                        Total Transactions
+                      </div>
+                      <div className="text-2xl font-bold text-indigo-900">
+                        {
+                          reportData.revenue.transactionMetrics
+                            .totalTransactions
+                        }
+                      </div>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="text-sm text-purple-600 font-medium">
+                        Avg Transaction
+                      </div>
+                      <div className="text-2xl font-bold text-purple-900">
+                        {formatCurrency(
+                          reportData.revenue.transactionMetrics
+                            .averageTransactionValue
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-green-50 p-4 rounded-lg">
+                    <div className="text-sm text-green-600 font-medium">
+                      Items per Transaction
+                    </div>
+                    <div className="text-2xl font-bold text-green-900">
+                      {reportData.revenue.transactionMetrics.itemsPerTransaction.toFixed(
+                        1
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Hourly Trends */}
+          {reportData.revenue &&
+            Object.keys(reportData.revenue.hourlyTrends).length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-600 rounded-xl flex items-center justify-center mr-4">
+                    <Clock className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      Hourly Sales Trends
+                    </h3>
+                    <p className="text-gray-600">
+                      Peak hours and sales distribution throughout the day
+                    </p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {Object.values(reportData.revenue.hourlyTrends)
+                    .sort((a: any, b: any) => a.hour - b.hour)
+                    .map((trend: any, index: number) => (
+                      <div
+                        key={index}
+                        className="bg-gradient-to-br from-orange-50 to-red-50 p-4 rounded-lg border border-orange-200"
+                      >
+                        <div className="text-center">
+                          <div className="text-sm text-orange-600 font-medium">
+                            {trend.hour}:00
+                          </div>
+                          <div className="text-xl font-bold text-orange-900">
+                            {formatCurrency(trend.sales)}
+                          </div>
+                          <div className="text-xs text-orange-500">
+                            {trend.transactions} transactions
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </div>
             )}
@@ -541,6 +884,114 @@ export default function Reports() {
             </div>
           )}
 
+          {/* Performance Insights */}
+          {reportData.revenue && (
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center mr-4">
+                  <BarChart3 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Performance Insights
+                  </h3>
+                  <p className="text-gray-600">
+                    Key performance indicators and business insights
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border border-blue-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-blue-600 font-semibold">
+                      Customer Retention
+                    </div>
+                    <Users className="w-5 h-5 text-blue-500" />
+                  </div>
+                  <div className="text-3xl font-bold text-blue-900">
+                    {reportData.revenue.customerAnalytics.totalCustomers > 0
+                      ? (
+                          (reportData.revenue.customerAnalytics
+                            .repeatCustomers /
+                            reportData.revenue.customerAnalytics
+                              .totalCustomers) *
+                          100
+                        ).toFixed(1)
+                      : 0}
+                    %
+                  </div>
+                  <div className="text-sm text-blue-600 mt-1">
+                    {reportData.revenue.customerAnalytics.repeatCustomers} of{" "}
+                    {reportData.revenue.customerAnalytics.totalCustomers}{" "}
+                    customers
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border border-green-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-green-600 font-semibold">
+                      Avg Commission Rate
+                    </div>
+                    <TrendingUp className="w-5 h-5 text-green-500" />
+                  </div>
+                  <div className="text-3xl font-bold text-green-900">
+                    {reportData.revenue.totalSales > 0
+                      ? (
+                          (reportData.revenue.employeeEarnings /
+                            reportData.revenue.totalSales) *
+                          100
+                        ).toFixed(1)
+                      : 0}
+                    %
+                  </div>
+                  <div className="text-sm text-green-600 mt-1">
+                    Employee commission rate
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-purple-600 font-semibold">
+                      Revenue per Hour
+                    </div>
+                    <Clock className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <div className="text-3xl font-bold text-purple-900">
+                    {Object.keys(reportData.revenue.hourlyTrends).length > 0
+                      ? formatCurrency(
+                          Object.values(reportData.revenue.hourlyTrends).reduce(
+                            (sum: number, trend: any) => sum + trend.sales,
+                            0
+                          ) /
+                            Object.keys(reportData.revenue.hourlyTrends).length
+                        )
+                      : formatCurrency(0)}
+                  </div>
+                  <div className="text-sm text-purple-600 mt-1">
+                    Average hourly revenue
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-sm text-orange-600 font-semibold">
+                      Transaction Efficiency
+                    </div>
+                    <BarChart3 className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <div className="text-3xl font-bold text-orange-900">
+                    {reportData.revenue.transactionMetrics.itemsPerTransaction.toFixed(
+                      1
+                    )}
+                  </div>
+                  <div className="text-sm text-orange-600 mt-1">
+                    Items per transaction
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Modern Report Period Info */}
           <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl p-6 border border-gray-200">
             <div className="flex items-center justify-center">
@@ -567,8 +1018,8 @@ export default function Reports() {
             No Report Data Available
           </h3>
           <p className="text-gray-500 mb-6">
-            Click "Generate Report" to view comprehensive revenue sharing
-            analytics
+            Click &quot;Generate Report&quot; to view comprehensive revenue
+            sharing analytics
           </p>
           <button
             onClick={generateReport}
