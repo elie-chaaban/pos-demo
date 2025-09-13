@@ -443,7 +443,7 @@ export default function Reports() {
             <button
               onClick={generateReport}
               disabled={loading}
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none cursor-pointer"
             >
               <RefreshCw
                 className={`w-5 h-5 ${loading ? "animate-spin" : ""}`}
@@ -480,7 +480,7 @@ export default function Reports() {
                       activeTab === tab.id
                         ? "border-indigo-500 text-indigo-600"
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200`}
+                    } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors duration-200 cursor-pointer`}
                   >
                     <Icon className="w-4 h-4" />
                     <span>{tab.name}</span>
@@ -1358,7 +1358,7 @@ export default function Reports() {
                       onClick={() =>
                         setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                       }
-                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
                     >
                       {sortOrder === "asc" ? "↑" : "↓"}
                     </button>
@@ -1369,7 +1369,7 @@ export default function Reports() {
                           `item-sales-${selectedPeriod}`
                         )
                       }
-                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Export</span>
@@ -1494,7 +1494,7 @@ export default function Reports() {
                       onClick={() =>
                         setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                       }
-                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
                     >
                       {sortOrder === "asc" ? "↑" : "↓"}
                     </button>
@@ -1505,7 +1505,7 @@ export default function Reports() {
                           `customer-sales-${selectedPeriod}`
                         )
                       }
-                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Export</span>
@@ -1647,7 +1647,7 @@ export default function Reports() {
                       onClick={() =>
                         setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                       }
-                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
                     >
                       {sortOrder === "asc" ? "↑" : "↓"}
                     </button>
@@ -1658,7 +1658,7 @@ export default function Reports() {
                           `category-sales-${selectedPeriod}`
                         )
                       }
-                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Export</span>
@@ -1782,7 +1782,7 @@ export default function Reports() {
                       onClick={() =>
                         setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                       }
-                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
                     >
                       {sortOrder === "asc" ? "↑" : "↓"}
                     </button>
@@ -1793,7 +1793,7 @@ export default function Reports() {
                           `expenses-${selectedPeriod}`
                         )
                       }
-                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Export</span>
@@ -2040,7 +2040,7 @@ export default function Reports() {
                       onClick={() =>
                         setSortOrder(sortOrder === "asc" ? "desc" : "asc")
                       }
-                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
                     >
                       {sortOrder === "asc" ? "↑" : "↓"}
                     </button>
@@ -2051,7 +2051,7 @@ export default function Reports() {
                           `employee-performance-${selectedPeriod}`
                         )
                       }
-                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
                     >
                       <Download className="w-4 h-4" />
                       <span>Export</span>
@@ -2161,7 +2161,7 @@ export default function Reports() {
           </p>
           <button
             onClick={generateReport}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
           >
             Generate Your First Report
           </button>

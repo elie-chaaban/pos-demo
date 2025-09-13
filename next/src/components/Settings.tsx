@@ -102,7 +102,7 @@ export default function Settings() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none"
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none cursor-pointer"
           >
             <Save className={`w-5 h-5 ${saving ? "animate-pulse" : ""}`} />
             <span>{saving ? "Saving..." : "Save Settings"}</span>
