@@ -355,7 +355,7 @@ export default function POSInterface() {
           </div>
           <button
             onClick={clearCart}
-            className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2"
+            className="bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 cursor-pointer"
           >
             <Trash2 className="w-4 h-4" />
             <span>Clear Cart</span>
@@ -402,8 +402,10 @@ export default function POSInterface() {
                   <div
                     key={item.id}
                     onClick={() => addToCart(item.id)}
-                    className={`bg-white border border-gray-200 rounded-lg p-4 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-indigo-300 ${
-                      isOutOfStock ? "opacity-50 cursor-not-allowed" : ""
+                    className={`bg-white border border-gray-200 rounded-lg p-4 transition-all duration-200 hover:shadow-md hover:border-indigo-300 ${
+                      isOutOfStock
+                        ? "opacity-50 cursor-not-allowed"
+                        : "cursor-pointer"
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
@@ -499,7 +501,7 @@ export default function POSInterface() {
                         </div>
                         <button
                           onClick={() => removeFromCart(cartItem.id)}
-                          className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition-colors"
+                          className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -535,7 +537,7 @@ export default function POSInterface() {
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => updateQuantity(cartItem.id, -1)}
-                            className="w-8 h-8 bg-white border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50 transition-colors"
+                            className="w-8 h-8 bg-white border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
                           >
                             <Minus className="w-3 h-3 text-gray-600" />
                           </button>
@@ -544,7 +546,7 @@ export default function POSInterface() {
                           </span>
                           <button
                             onClick={() => updateQuantity(cartItem.id, 1)}
-                            className="w-8 h-8 bg-white border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50 transition-colors"
+                            className="w-8 h-8 bg-white border border-gray-300 rounded flex items-center justify-center hover:bg-gray-50 transition-colors cursor-pointer"
                           >
                             <Plus className="w-3 h-3 text-gray-600" />
                           </button>
@@ -580,7 +582,7 @@ export default function POSInterface() {
                   </label>
                   <button
                     onClick={() => setShowAddCustomer(!showAddCustomer)}
-                    className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center space-x-1"
+                    className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center space-x-1 cursor-pointer"
                   >
                     <UserPlus className="w-3 h-3" />
                     <span>Add New</span>
@@ -662,7 +664,7 @@ export default function POSInterface() {
                     <div className="flex space-x-2">
                       <button
                         onClick={addNewCustomer}
-                        className="flex-1 bg-indigo-600 text-white py-2 px-3 rounded text-xs font-semibold hover:bg-indigo-700 transition-colors"
+                        className="flex-1 bg-indigo-600 text-white py-2 px-3 rounded text-xs font-semibold hover:bg-indigo-700 transition-colors cursor-pointer"
                       >
                         Add Customer
                       </button>
@@ -677,7 +679,7 @@ export default function POSInterface() {
                             dateOfBirth: "",
                           });
                         }}
-                        className="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-xs font-semibold hover:bg-gray-400 transition-colors"
+                        className="flex-1 bg-gray-300 text-gray-700 py-2 px-3 rounded text-xs font-semibold hover:bg-gray-400 transition-colors cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -693,7 +695,7 @@ export default function POSInterface() {
                 className={`w-full py-3 px-4 rounded-lg font-bold text-sm transition-all duration-200 flex items-center justify-center space-x-2 ${
                   cart.length === 0 || isProcessingPayment
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
                 }`}
               >
                 {isProcessingPayment ? (
