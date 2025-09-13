@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { calculateCOGS } from "@/lib/costing";
 
 export async function GET() {
   try {
@@ -110,6 +111,9 @@ export async function POST(request: NextRequest) {
               },
             });
 
+            // Calculate cost of goods sold using the configured costing method
+            const cogsResult = await calculateCOGS(tx, itemId, quantity);
+
             // Create inventory record for usage
             await tx.inventoryRecord.create({
               data: {
@@ -117,8 +121,9 @@ export async function POST(request: NextRequest) {
                 saleId: newSale.id,
                 type: "Usage",
                 quantity: -quantity, // Negative for usage
-                unitCost: itemDetails.averageCost || 0,
-                totalCost: (itemDetails.averageCost || 0) * quantity,
+                unitCost: cogsResult.unitCost,
+                totalCost: cogsResult.totalCost,
+                cogsTotal: cogsResult.totalCost,
               },
             });
           }

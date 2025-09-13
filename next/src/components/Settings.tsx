@@ -182,20 +182,20 @@ export default function Settings() {
                 Costing Method:
               </label>
               <select
-                value={settings.costingMethod || "FIFO"}
+                value={settings.costingMethod || "LIFO"}
                 onChange={(e) =>
                   handleInputChange("costingMethod", e.target.value)
                 }
                 className="w-full max-w-md border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
-                <option value="FIFO">FIFO (First In, First Out)</option>
+                <option value="LIFO">LIFO (Last In, First Out)</option>
                 <option value="WeightedAverage">Weighted Average Cost</option>
               </select>
             </div>
 
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="text-sm text-blue-800">
-                <strong>FIFO:</strong> Uses the cost of the oldest inventory
+                <strong>LIFO:</strong> Uses the cost of the newest inventory
                 first
                 <br />
                 <strong>Weighted Average:</strong> Uses the average cost of all
@@ -215,16 +215,16 @@ export default function Settings() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-green-50 p-4 rounded-lg">
               <h4 className="font-semibold text-green-800 mb-2">
-                FIFO Example:
+                LIFO Example:
               </h4>
               <div className="text-sm text-green-700 space-y-2">
                 <p>You buy 100 items at $8 each, then 50 items at $10 each.</p>
                 <p>
                   When you sell 30 items, the cost is calculated using the
-                  oldest batch first:
+                  newest batch first:
                 </p>
                 <ul className="list-disc list-inside ml-2">
-                  <li>30 items × $8 = $240 (from first batch)</li>
+                  <li>30 items × $10 = $300 (from second batch)</li>
                 </ul>
               </div>
             </div>
@@ -241,7 +241,6 @@ export default function Settings() {
             </div>
           </div>
         </div>
-
 
         {/* System Information */}
         <div className="bg-gray-50 rounded-lg p-6">

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { calculateCOGS } from "@/lib/costing";
 
 export async function GET() {
   try {
@@ -122,6 +123,19 @@ export async function POST(request: NextRequest) {
       } else if (type === "Usage") {
         // Subtract from stock
         newStock = Math.max(0, newStock - quantity);
+
+        // Calculate cost of goods sold using the configured costing method
+        const cogsResult = await calculateCOGS(tx, itemId, quantity);
+
+        // Update the inventory record with calculated COGS
+        await tx.inventoryRecord.update({
+          where: { id: inventoryRecord.id },
+          data: {
+            unitCost: cogsResult.unitCost,
+            totalCost: cogsResult.totalCost,
+            cogsTotal: cogsResult.totalCost,
+          },
+        });
       } else if (type === "Adjustment") {
         // Direct stock adjustment
         newStock = quantity;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { calculateCOGS } from "@/lib/costing";
 
 export async function GET(
   request: NextRequest,
@@ -123,6 +124,16 @@ export async function PUT(
           totalQuantity += record.quantity;
         } else if (record.type === "Usage") {
           currentStock = Math.max(0, currentStock - record.quantity);
+
+          // For usage records, recalculate COGS if this is the record being updated
+          if (record.id === params.id && type === "Usage") {
+            const cogsResult = await calculateCOGS(
+              tx,
+              itemId,
+              Math.abs(quantity)
+            );
+            totalCost = cogsResult.totalCost;
+          }
         } else if (record.type === "Adjustment") {
           currentStock = record.quantity;
         }
