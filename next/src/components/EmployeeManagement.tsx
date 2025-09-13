@@ -317,7 +317,7 @@ export default function EmployeeManagement() {
       {/* Modern Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
+          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 {editingEmployee ? "Edit Employee" : "Add New Employee"}
