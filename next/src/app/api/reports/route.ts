@@ -137,6 +137,50 @@ async function generateCustomerSalesReport(startDate: Date, endDate: Date) {
   };
 }
 
+// Helper function to generate expenses report
+async function generateExpensesReport(startDate: Date, endDate: Date) {
+  const expenses = await prisma.expense.findMany({
+    where: {
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    include: {
+      category: true,
+    },
+    orderBy: {
+      date: "desc",
+    },
+  });
+
+  const expensesData = expenses.map((expense) => ({
+    id: expense.id,
+    description: expense.description,
+    amount: expense.amount,
+    category: expense.category.name,
+    paymentMethod: expense.paymentMethod,
+    date: expense.date.toISOString(),
+    vendor: expense.notes || null,
+  }));
+
+  return {
+    expenses: expensesData,
+    summary: {
+      totalExpenses: expensesData.reduce(
+        (sum, expense) => sum + expense.amount,
+        0
+      ),
+      totalCount: expensesData.length,
+      averageExpense:
+        expensesData.length > 0
+          ? expensesData.reduce((sum, expense) => sum + expense.amount, 0) /
+            expensesData.length
+          : 0,
+    },
+  };
+}
+
 // Helper function to generate category sales report
 async function generateCategorySalesReport(startDate: Date, endDate: Date) {
   const sales = await prisma.sale.findMany({
@@ -569,6 +613,11 @@ export async function GET(request: NextRequest) {
         endDate
       );
       return NextResponse.json(categorySalesData);
+    }
+
+    if (type === "expenses") {
+      const expensesData = await generateExpensesReport(startDate, endDate);
+      return NextResponse.json(expensesData);
     }
 
     return NextResponse.json({

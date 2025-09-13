@@ -48,6 +48,16 @@ interface CategorySalesData extends Record<string, unknown> {
   marketShare: number;
 }
 
+interface ExpenseData extends Record<string, unknown> {
+  id: string;
+  description: string;
+  amount: number;
+  category: string;
+  paymentMethod: string;
+  date: string;
+  vendor?: string;
+}
+
 interface ReportData {
   period: string;
   startDate: string;
@@ -168,9 +178,112 @@ export default function Reports() {
   const [categorySalesData, setCategorySalesData] = useState<{
     categories: CategorySalesData[];
   } | null>(null);
+  const [expensesData, setExpensesData] = useState<{
+    expenses: ExpenseData[];
+  } | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("revenue");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const fetchItemSalesData = useCallback(async () => {
+    try {
+      let url = `/api/reports?period=${selectedPeriod}&type=item-sales`;
+
+      if (
+        useCustomRange &&
+        customDateRange.startDate &&
+        customDateRange.endDate
+      ) {
+        url += `&startDate=${customDateRange.startDate}&endDate=${customDateRange.endDate}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+      setItemSalesData(data);
+    } catch (error) {
+      console.error("Error fetching item sales data:", error);
+    }
+  }, [
+    selectedPeriod,
+    useCustomRange,
+    customDateRange.startDate,
+    customDateRange.endDate,
+  ]);
+
+  const fetchCustomerSalesData = useCallback(async () => {
+    try {
+      let url = `/api/reports?period=${selectedPeriod}&type=customer-sales`;
+
+      if (
+        useCustomRange &&
+        customDateRange.startDate &&
+        customDateRange.endDate
+      ) {
+        url += `&startDate=${customDateRange.startDate}&endDate=${customDateRange.endDate}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+      setCustomerSalesData(data);
+    } catch (error) {
+      console.error("Error fetching customer sales data:", error);
+    }
+  }, [
+    selectedPeriod,
+    useCustomRange,
+    customDateRange.startDate,
+    customDateRange.endDate,
+  ]);
+
+  const fetchCategorySalesData = useCallback(async () => {
+    try {
+      let url = `/api/reports?period=${selectedPeriod}&type=category-sales`;
+
+      if (
+        useCustomRange &&
+        customDateRange.startDate &&
+        customDateRange.endDate
+      ) {
+        url += `&startDate=${customDateRange.startDate}&endDate=${customDateRange.endDate}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+      setCategorySalesData(data);
+    } catch (error) {
+      console.error("Error fetching category sales data:", error);
+    }
+  }, [
+    selectedPeriod,
+    useCustomRange,
+    customDateRange.startDate,
+    customDateRange.endDate,
+  ]);
+
+  const fetchExpensesData = useCallback(async () => {
+    try {
+      let url = `/api/reports?period=${selectedPeriod}&type=expenses`;
+
+      if (
+        useCustomRange &&
+        customDateRange.startDate &&
+        customDateRange.endDate
+      ) {
+        url += `&startDate=${customDateRange.startDate}&endDate=${customDateRange.endDate}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+      setExpensesData(data);
+    } catch (error) {
+      console.error("Error fetching expenses data:", error);
+    }
+  }, [
+    selectedPeriod,
+    useCustomRange,
+    customDateRange.startDate,
+    customDateRange.endDate,
+  ]);
 
   const generateReport = useCallback(async () => {
     setLoading(true);
@@ -194,6 +307,7 @@ export default function Reports() {
         fetchItemSalesData(),
         fetchCustomerSalesData(),
         fetchCategorySalesData(),
+        fetchExpensesData(),
       ]);
     } catch (error) {
       console.error("Error generating report:", error);
@@ -206,71 +320,15 @@ export default function Reports() {
     useCustomRange,
     customDateRange.startDate,
     customDateRange.endDate,
+    fetchItemSalesData,
+    fetchCustomerSalesData,
+    fetchCategorySalesData,
+    fetchExpensesData,
   ]);
 
   useEffect(() => {
     generateReport();
   }, [generateReport]);
-
-  const fetchItemSalesData = async () => {
-    try {
-      let url = `/api/reports?period=${selectedPeriod}&type=item-sales`;
-
-      if (
-        useCustomRange &&
-        customDateRange.startDate &&
-        customDateRange.endDate
-      ) {
-        url += `&startDate=${customDateRange.startDate}&endDate=${customDateRange.endDate}`;
-      }
-
-      const response = await fetch(url);
-      const data = await response.json();
-      setItemSalesData(data);
-    } catch (error) {
-      console.error("Error fetching item sales data:", error);
-    }
-  };
-
-  const fetchCustomerSalesData = async () => {
-    try {
-      let url = `/api/reports?period=${selectedPeriod}&type=customer-sales`;
-
-      if (
-        useCustomRange &&
-        customDateRange.startDate &&
-        customDateRange.endDate
-      ) {
-        url += `&startDate=${customDateRange.startDate}&endDate=${customDateRange.endDate}`;
-      }
-
-      const response = await fetch(url);
-      const data = await response.json();
-      setCustomerSalesData(data);
-    } catch (error) {
-      console.error("Error fetching customer sales data:", error);
-    }
-  };
-
-  const fetchCategorySalesData = async () => {
-    try {
-      let url = `/api/reports?period=${selectedPeriod}&type=category-sales`;
-
-      if (
-        useCustomRange &&
-        customDateRange.startDate &&
-        customDateRange.endDate
-      ) {
-        url += `&startDate=${customDateRange.startDate}&endDate=${customDateRange.endDate}`;
-      }
-
-      const response = await fetch(url);
-      const data = await response.json();
-      setCategorySalesData(data);
-    } catch (error) {
-      console.error("Error fetching category sales data:", error);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -405,6 +463,7 @@ export default function Reports() {
                 { id: "item-sales", name: "Item Sales", icon: ShoppingCart },
                 { id: "customer-sales", name: "Customer Sales", icon: User },
                 { id: "category-sales", name: "Category Sales", icon: Tag },
+                { id: "expenses", name: "Expenses", icon: CreditCard },
                 {
                   id: "employee-performance",
                   name: "Employee Performance",
@@ -1672,6 +1731,263 @@ export default function Reports() {
                     <Tag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-500">
                       No category sales data available for the selected period.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Expenses Tab */}
+          {activeTab === "expenses" && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
+                      <CreditCard className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        Expenses Report
+                      </h3>
+                      <p className="text-gray-600">
+                        Detailed analysis of business expenses and cost tracking
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search expenses..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      />
+                    </div>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    >
+                      <option value="amount">Amount</option>
+                      <option value="date">Date</option>
+                      <option value="description">Description</option>
+                      <option value="category">Category</option>
+                    </select>
+                    <button
+                      onClick={() =>
+                        setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+                      }
+                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                      {sortOrder === "asc" ? "↑" : "↓"}
+                    </button>
+                    <button
+                      onClick={() =>
+                        exportToCSV(
+                          expensesData?.expenses || [],
+                          `expenses-${selectedPeriod}`
+                        )
+                      }
+                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Export</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expenses Summary Cards */}
+                {reportData.expenses && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div className="bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl border border-red-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-red-600 font-semibold">
+                          Total Expenses
+                        </div>
+                        <CreditCard className="w-5 h-5 text-red-500" />
+                      </div>
+                      <div className="text-3xl font-bold text-red-900">
+                        {formatCurrency(reportData.expenses.totalExpenses)}
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-6 rounded-xl border border-orange-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-orange-600 font-semibold">
+                          Categories
+                        </div>
+                        <Tag className="w-5 h-5 text-orange-500" />
+                      </div>
+                      <div className="text-3xl font-bold text-orange-900">
+                        {Object.keys(reportData.expenses.byCategory).length}
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl border border-purple-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="text-sm text-purple-600 font-semibold">
+                          Payment Methods
+                        </div>
+                        <DollarSign className="w-5 h-5 text-purple-500" />
+                      </div>
+                      <div className="text-3xl font-bold text-purple-900">
+                        {
+                          Object.keys(reportData.expenses.byPaymentMethod)
+                            .length
+                        }
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Expenses by Category */}
+                {reportData.expenses &&
+                  Object.keys(reportData.expenses.byCategory).length > 0 && (
+                    <div className="mb-8">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                        Expenses by Category
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {Object.values(reportData.expenses.byCategory).map(
+                          (
+                            category: {
+                              name: string;
+                              total: number;
+                              count: number;
+                            },
+                            index: number
+                          ) => (
+                            <div
+                              key={index}
+                              className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {category.name}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {category.count} expenses
+                                </div>
+                              </div>
+                              <div className="text-2xl font-bold text-red-600">
+                                {formatCurrency(category.total)}
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Expenses by Payment Method */}
+                {reportData.expenses &&
+                  Object.keys(reportData.expenses.byPaymentMethod).length >
+                    0 && (
+                    <div className="mb-8">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                        Expenses by Payment Method
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {Object.entries(
+                          reportData.expenses.byPaymentMethod
+                        ).map(
+                          ([method, data]: [
+                            string,
+                            { total: number; count: number }
+                          ]) => (
+                            <div
+                              key={method}
+                              className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {method}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {data.count} expenses
+                                </div>
+                              </div>
+                              <div className="text-2xl font-bold text-blue-600">
+                                {formatCurrency(data.total)}
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                {/* Detailed Expenses Table */}
+                {expensesData?.expenses ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Description
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Category
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Amount
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Payment Method
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Notes
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {filterAndSortData(
+                          expensesData.expenses,
+                          searchTerm,
+                          sortBy,
+                          sortOrder
+                        ).map((expense, index: number) => {
+                          const typedExpense = expense as ExpenseData;
+                          return (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {typedExpense.description}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                  {typedExpense.category}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-red-600">
+                                {formatCurrency(typedExpense.amount)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {typedExpense.paymentMethod}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatDate(typedExpense.date)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {typedExpense.vendor || "N/A"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">
+                      No expenses data available for the selected period.
                     </p>
                   </div>
                 )}
