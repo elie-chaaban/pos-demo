@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { formatNumber } from "../lib/utils";
 
 interface UserRole {
   id: string;
@@ -185,7 +186,7 @@ export default function EmployeeManagement() {
           <div className="flex items-center space-x-8">
             <div className="text-center">
               <div className="text-3xl font-bold text-indigo-600">
-                {employees.length}
+                {formatNumber(employees.length)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Employees
@@ -193,11 +194,11 @@ export default function EmployeeManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                {
+                {formatNumber(
                   employees.filter((e) =>
                     e.employeeRoles.some((er) => er.role.name === "Hairdresser")
                   ).length
-                }
+                )}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Hairdressers
@@ -205,13 +206,13 @@ export default function EmployeeManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-600">
-                {
+                {formatNumber(
                   employees.filter((e) =>
                     e.employeeRoles.some(
                       (er) => er.role.name === "Nail Technician"
                     )
                   ).length
-                }
+                )}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Nail Techs

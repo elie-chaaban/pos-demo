@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { formatCurrency, formatNumber } from "../lib/utils";
 
 interface Item {
   id: string;
@@ -188,7 +189,7 @@ export default function ItemManagement() {
           <div className="flex items-center space-x-8">
             <div className="text-center">
               <div className="text-3xl font-bold text-indigo-600">
-                {items.length}
+                {formatNumber(items.length)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Items
@@ -196,11 +197,11 @@ export default function ItemManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                $
-                {items
-                  .filter((item) => !item.isService)
-                  .reduce((sum, item) => sum + item.price * item.stock, 0)
-                  .toFixed(2)}
+                {formatCurrency(
+                  items
+                    .filter((item) => !item.isService)
+                    .reduce((sum, item) => sum + item.price * item.stock, 0)
+                )}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Inventory Value
@@ -294,7 +295,7 @@ export default function ItemManagement() {
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600 font-medium">Price:</span>
                   <span className="text-2xl font-bold text-green-600">
-                    ${item.price.toFixed(2)}
+                    {formatCurrency(item.price)}
                   </span>
                 </div>
                 {!item.isService && (
@@ -309,14 +310,14 @@ export default function ItemManagement() {
                           : "text-green-600"
                       }`}
                     >
-                      {item.stock} units
+                      {formatNumber(item.stock)} units
                     </span>
                   </div>
                 )}
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600 font-medium">Avg Cost:</span>
                   <span className="font-bold text-gray-900">
-                    ${(item.averageCost || 0).toFixed(2)}
+                    {formatCurrency(item.averageCost || 0)}
                   </span>
                 </div>
                 {item.description && (

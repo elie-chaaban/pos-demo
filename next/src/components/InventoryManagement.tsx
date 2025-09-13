@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Package } from "lucide-react";
+import { formatCurrency, formatNumber } from "../lib/utils";
 
 interface InventoryRecord {
   id: string;
@@ -184,13 +185,6 @@ export default function InventoryManagement() {
     });
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -215,7 +209,7 @@ export default function InventoryManagement() {
           <div className="flex items-center space-x-8">
             <div className="text-center">
               <div className="text-3xl font-bold text-indigo-600">
-                {inventoryRecords.length}
+                {formatNumber(inventoryRecords.length)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Records
@@ -223,10 +217,12 @@ export default function InventoryManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                $
-                {inventoryRecords
-                  .reduce((sum, record) => sum + record.totalCost, 0)
-                  .toFixed(2)}
+                {formatCurrency(
+                  inventoryRecords.reduce(
+                    (sum, record) => sum + record.totalCost,
+                    0
+                  )
+                )}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Value
@@ -234,7 +230,9 @@ export default function InventoryManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-600">
-                {inventoryRecords.filter((r) => r.type === "Purchase").length}
+                {formatNumber(
+                  inventoryRecords.filter((r) => r.type === "Purchase").length
+                )}
               </div>
               <div className="text-sm text-gray-500 font-medium">Purchases</div>
             </div>

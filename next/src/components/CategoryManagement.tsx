@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { formatNumber } from "../lib/utils";
 
 interface UserRole {
   id: string;
@@ -192,7 +193,7 @@ export default function CategoryManagement() {
           <div className="flex items-center">
             <div className="text-center">
               <div className="text-3xl font-bold text-indigo-600">
-                {categories.length}
+                {formatNumber(categories.length)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Categories

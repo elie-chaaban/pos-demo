@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Users } from "lucide-react";
+import { formatNumber } from "../lib/utils";
 
 interface UserRole {
   id: string;
@@ -155,7 +156,7 @@ export default function UserRoleManagement() {
           <div className="flex items-center space-x-8">
             <div className="text-center">
               <div className="text-3xl font-bold text-indigo-600">
-                {userRoles.length}
+                {formatNumber(userRoles.length)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Roles
@@ -163,9 +164,11 @@ export default function UserRoleManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                {userRoles.reduce(
-                  (sum, role) => sum + (role.employeeRoles?.length || 0),
-                  0
+                {formatNumber(
+                  userRoles.reduce(
+                    (sum, role) => sum + (role.employeeRoles?.length || 0),
+                    0
+                  )
                 )}
               </div>
               <div className="text-sm text-gray-500 font-medium">
@@ -174,9 +177,11 @@ export default function UserRoleManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-600">
-                {userRoles.reduce(
-                  (sum, role) => sum + (role.categoryRoles?.length || 0),
-                  0
+                {formatNumber(
+                  userRoles.reduce(
+                    (sum, role) => sum + (role.categoryRoles?.length || 0),
+                    0
+                  )
                 )}
               </div>
               <div className="text-sm text-gray-500 font-medium">
@@ -268,7 +273,8 @@ export default function UserRoleManagement() {
 
                   <div className="mb-2">
                     <span className="text-gray-600 font-medium text-sm">
-                      Employees ({role.employeeRoles?.length || 0}):
+                      Employees ({formatNumber(role.employeeRoles?.length || 0)}
+                      ):
                     </span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {role.employeeRoles && role.employeeRoles.length > 0 ? (
@@ -287,7 +293,7 @@ export default function UserRoleManagement() {
                       )}
                       {role.employeeRoles && role.employeeRoles.length > 3 && (
                         <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full font-medium">
-                          +{role.employeeRoles.length - 3} more
+                          +{formatNumber(role.employeeRoles.length - 3)} more
                         </span>
                       )}
                     </div>

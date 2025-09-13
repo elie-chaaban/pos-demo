@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { formatCurrency, formatNumber } from "../lib/utils";
 
 interface Expense {
   id: string;
@@ -187,7 +188,7 @@ export default function ExpenseManagement() {
           <div className="flex items-center space-x-8">
             <div className="text-center">
               <div className="text-3xl font-bold text-indigo-600">
-                {expenses.length}
+                {formatNumber(expenses.length)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Expenses
@@ -195,10 +196,9 @@ export default function ExpenseManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-red-600">
-                $
-                {expenses
-                  .reduce((sum, expense) => sum + expense.amount, 0)
-                  .toFixed(2)}
+                {formatCurrency(
+                  expenses.reduce((sum, expense) => sum + expense.amount, 0)
+                )}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Amount
@@ -206,11 +206,10 @@ export default function ExpenseManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-600">
-                $
-                {(
+                {formatCurrency(
                   expenses.reduce((sum, expense) => sum + expense.amount, 0) /
-                  Math.max(expenses.length, 1)
-                ).toFixed(2)}
+                    Math.max(expenses.length, 1)
+                )}
               </div>
               <div className="text-sm text-gray-500 font-medium">Average</div>
             </div>
@@ -296,7 +295,7 @@ export default function ExpenseManagement() {
                 <div className="flex items-center justify-between border-t border-gray-200 pt-3">
                   <span className="text-gray-600 font-medium">Amount:</span>
                   <span className="text-2xl font-bold text-red-600">
-                    ${expense.amount.toFixed(2)}
+                    {formatCurrency(expense.amount)}
                   </span>
                 </div>
                 {expense.notes && (

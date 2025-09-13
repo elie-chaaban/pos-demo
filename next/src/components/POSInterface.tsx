@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   UserPlus,
 } from "lucide-react";
+import { formatCurrency, formatNumber } from "../lib/utils";
 
 interface Item {
   id: string;
@@ -331,19 +332,19 @@ export default function POSInterface() {
             <div className="flex items-center space-x-4">
               <div className="text-center">
                 <div className="text-lg font-bold text-indigo-600">
-                  {items.length}
+                  {formatNumber(items.length)}
                 </div>
                 <div className="text-xs text-gray-500 font-medium">Items</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-green-600">
-                  {cart.length}
+                  {formatNumber(cart.length)}
                 </div>
                 <div className="text-xs text-gray-500 font-medium">In Cart</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-purple-600">
-                  ${total.toFixed(2)}
+                  {formatCurrency(total)}
                 </div>
                 <div className="text-xs text-gray-500 font-medium">Total</div>
               </div>
@@ -373,7 +374,8 @@ export default function POSInterface() {
                 </p>
               </div>
               <div className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg font-semibold text-sm">
-                {filteredItems.length} of {items.length}
+                {formatNumber(filteredItems.length)} of{" "}
+                {formatNumber(items.length)}
               </div>
             </div>
             <div className="relative">
@@ -418,7 +420,7 @@ export default function POSInterface() {
                     </div>
 
                     <div className="text-xl font-bold text-green-600 mb-3">
-                      ${item.price.toFixed(2)}
+                      {formatCurrency(item.price)}
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -429,7 +431,9 @@ export default function POSInterface() {
                             : "bg-gray-100 text-gray-800"
                         }`}
                       >
-                        {item.isService ? "Service" : `Stock: ${item.stock}`}
+                        {item.isService
+                          ? "Service"
+                          : `Stock: ${formatNumber(item.stock)}`}
                       </span>
                       <span className="text-xs text-gray-600 font-medium">
                         {item.category.name}
@@ -454,7 +458,7 @@ export default function POSInterface() {
               </div>
               {cart.length > 0 && (
                 <div className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-lg font-bold text-sm">
-                  {cart.length} items
+                  {formatNumber(cart.length)} items
                 </div>
               )}
             </div>
@@ -487,7 +491,7 @@ export default function POSInterface() {
                             {item.name}
                           </h4>
                           <p className="text-xs text-gray-600">
-                            ${item.price.toFixed(2)} each
+                            {formatCurrency(item.price)} each
                           </p>
                         </div>
                         <button
@@ -543,7 +547,7 @@ export default function POSInterface() {
                           </button>
                         </div>
                         <div className="font-bold text-lg text-green-600">
-                          ${(item.price * cartItem.quantity).toFixed(2)}
+                          {formatCurrency(item.price * cartItem.quantity)}
                         </div>
                       </div>
                     </div>
@@ -559,7 +563,9 @@ export default function POSInterface() {
               <div className="space-y-2">
                 <div className="flex justify-between text-lg font-bold border-t border-gray-300 pt-2">
                   <span className="text-gray-900">Total:</span>
-                  <span className="text-green-600">${total.toFixed(2)}</span>
+                  <span className="text-green-600">
+                    {formatCurrency(total)}
+                  </span>
                 </div>
               </div>
 

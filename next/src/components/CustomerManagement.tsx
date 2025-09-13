@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import { formatNumber } from "../lib/utils";
 
 interface Customer {
   id: string;
@@ -159,7 +160,7 @@ export default function CustomerManagement() {
           <div className="flex items-center space-x-8">
             <div className="text-center">
               <div className="text-3xl font-bold text-indigo-600">
-                {customers.length}
+                {formatNumber(customers.length)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Customers
@@ -167,7 +168,7 @@ export default function CustomerManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                {customers.filter((c) => c.email).length}
+                {formatNumber(customers.filter((c) => c.email).length)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 With Email

@@ -16,6 +16,7 @@ import {
   Download,
   Search,
 } from "lucide-react";
+import { formatCurrency, formatNumber, formatPercentage } from "../lib/utils";
 
 interface ItemSalesData extends Record<string, unknown> {
   id: string;
@@ -269,13 +270,6 @@ export default function Reports() {
     } catch (error) {
       console.error("Error fetching category sales data:", error);
     }
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
@@ -588,7 +582,7 @@ export default function Reports() {
                                   Items Sold:
                                 </span>
                                 <span className="font-bold text-indigo-600">
-                                  {employee.itemsSold}
+                                  {formatNumber(employee.itemsSold)}
                                 </span>
                               </div>
                             </div>
@@ -667,13 +661,12 @@ export default function Reports() {
                                 </span>
                                 <span className="font-bold text-indigo-600">
                                   {category.totalSales > 0
-                                    ? (
+                                    ? formatPercentage(
                                         (category.employeeCommission /
                                           category.totalSales) *
-                                        100
-                                      ).toFixed(1)
-                                    : 0}
-                                  %
+                                          100
+                                      )
+                                    : "0%"}
                                 </span>
                               </div>
                             </div>
@@ -709,10 +702,10 @@ export default function Reports() {
                             Total Customers
                           </div>
                           <div className="text-2xl font-bold text-blue-900">
-                            {
+                            {formatNumber(
                               reportData.revenue.customerAnalytics
                                 .totalCustomers
-                            }
+                            )}
                           </div>
                         </div>
                         <div className="bg-green-50 p-4 rounded-lg">
@@ -720,10 +713,10 @@ export default function Reports() {
                             Repeat Customers
                           </div>
                           <div className="text-2xl font-bold text-green-900">
-                            {
+                            {formatNumber(
                               reportData.revenue.customerAnalytics
                                 .repeatCustomers
-                            }
+                            )}
                           </div>
                         </div>
                       </div>
@@ -733,7 +726,9 @@ export default function Reports() {
                             New Customers
                           </div>
                           <div className="text-2xl font-bold text-purple-900">
-                            {reportData.revenue.customerAnalytics.newCustomers}
+                            {formatNumber(
+                              reportData.revenue.customerAnalytics.newCustomers
+                            )}
                           </div>
                         </div>
                         <div className="bg-orange-50 p-4 rounded-lg">
@@ -766,7 +761,8 @@ export default function Reports() {
                                       {customer.name}
                                     </div>
                                     <div className="text-sm text-gray-500">
-                                      {customer.transactionCount} transactions
+                                      {formatNumber(customer.transactionCount)}{" "}
+                                      transactions
                                     </div>
                                   </div>
                                   <div className="text-right">
@@ -805,10 +801,10 @@ export default function Reports() {
                             Total Transactions
                           </div>
                           <div className="text-2xl font-bold text-indigo-900">
-                            {
+                            {formatNumber(
                               reportData.revenue.transactionMetrics
                                 .totalTransactions
-                            }
+                            )}
                           </div>
                         </div>
                         <div className="bg-purple-50 p-4 rounded-lg">
@@ -828,7 +824,9 @@ export default function Reports() {
                           Items per Transaction
                         </div>
                         <div className="text-2xl font-bold text-green-900">
-                          {reportData.revenue.transactionMetrics.itemsPerTransaction.toFixed(
+                          {formatNumber(
+                            reportData.revenue.transactionMetrics
+                              .itemsPerTransaction,
                             1
                           )}
                         </div>
@@ -980,7 +978,7 @@ export default function Reports() {
                         Total Usage
                       </div>
                       <div className="text-2xl font-bold text-blue-900">
-                        {reportData.inventory.totalUsage} units
+                        {formatNumber(reportData.inventory.totalUsage)} units
                       </div>
                     </div>
                   </div>
@@ -1015,10 +1013,10 @@ export default function Reports() {
                                   {formatCurrency(data.totalCost)}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {data.totalQuantity}
+                                  {formatNumber(data.totalQuantity)}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {data.count}
+                                  {formatNumber(data.count)}
                                 </td>
                               </tr>
                             )
@@ -1067,7 +1065,7 @@ export default function Reports() {
                                     {formatCurrency(category.total)}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {category.count}
+                                    {formatNumber(category.count)}
                                   </td>
                                 </tr>
                               )
@@ -1111,7 +1109,7 @@ export default function Reports() {
                                   {formatCurrency(data.total)}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {data.count}
+                                  {formatNumber(data.count)}
                                 </td>
                               </tr>
                             ))}
@@ -1149,15 +1147,14 @@ export default function Reports() {
                       </div>
                       <div className="text-3xl font-bold text-blue-900">
                         {reportData.revenue.customerAnalytics.totalCustomers > 0
-                          ? (
+                          ? formatPercentage(
                               (reportData.revenue.customerAnalytics
                                 .repeatCustomers /
                                 reportData.revenue.customerAnalytics
                                   .totalCustomers) *
-                              100
-                            ).toFixed(1)
-                          : 0}
-                        %
+                                100
+                            )
+                          : "0%"}
                       </div>
                       <div className="text-sm text-blue-600 mt-1">
                         {reportData.revenue.customerAnalytics.repeatCustomers}{" "}
@@ -1175,13 +1172,12 @@ export default function Reports() {
                       </div>
                       <div className="text-3xl font-bold text-green-900">
                         {reportData.revenue.totalSales > 0
-                          ? (
+                          ? formatPercentage(
                               (reportData.revenue.employeeEarnings /
                                 reportData.revenue.totalSales) *
-                              100
-                            ).toFixed(1)
-                          : 0}
-                        %
+                                100
+                            )
+                          : "0%"}
                       </div>
                       <div className="text-sm text-green-600 mt-1">
                         Employee commission rate
@@ -1229,7 +1225,9 @@ export default function Reports() {
                         <BarChart3 className="w-5 h-5 text-orange-500" />
                       </div>
                       <div className="text-3xl font-bold text-orange-900">
-                        {reportData.revenue.transactionMetrics.itemsPerTransaction.toFixed(
+                        {formatNumber(
+                          reportData.revenue.transactionMetrics
+                            .itemsPerTransaction,
                           1
                         )}
                       </div>
@@ -1350,32 +1348,35 @@ export default function Reports() {
                           searchTerm,
                           sortBy,
                           sortOrder
-                        ).map((item: ItemSalesData, index: number) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {item.name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {item.category}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {item.quantitySold}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                              {formatCurrency(item.revenue)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {formatCurrency(item.averagePrice)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {item.profitMargin}%
-                            </td>
-                          </tr>
-                        ))}
+                        ).map((item, index: number) => {
+                          const typedItem = item as ItemSalesData;
+                          return (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {typedItem.name}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {typedItem.category}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatNumber(typedItem.quantitySold)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                                {formatCurrency(typedItem.revenue)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatCurrency(typedItem.averagePrice)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatNumber(typedItem.profitMargin)}%
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1483,47 +1484,52 @@ export default function Reports() {
                           searchTerm,
                           sortBy,
                           sortOrder
-                        ).map((customer: CustomerSalesData, index: number) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {customer.name}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {customer.email}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                              {formatCurrency(customer.totalSpent)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {customer.transactionCount}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {formatCurrency(customer.averageOrderValue)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {formatDate(customer.lastPurchase)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                  customer.transactionCount > 5
-                                    ? "bg-green-100 text-green-800"
-                                    : customer.transactionCount > 2
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-gray-100 text-gray-800"
-                                }`}
-                              >
-                                {customer.transactionCount > 5
-                                  ? "VIP"
-                                  : customer.transactionCount > 2
-                                  ? "Regular"
-                                  : "New"}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
+                        ).map((customer, index: number) => {
+                          const typedCustomer = customer as CustomerSalesData;
+                          return (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {typedCustomer.name}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {typedCustomer.email}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                                {formatCurrency(typedCustomer.totalSpent)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatNumber(typedCustomer.transactionCount)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatCurrency(
+                                  typedCustomer.averageOrderValue
+                                )}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatDate(typedCustomer.lastPurchase)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    typedCustomer.transactionCount > 5
+                                      ? "bg-green-100 text-green-800"
+                                      : typedCustomer.transactionCount > 2
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-gray-100 text-gray-800"
+                                  }`}
+                                >
+                                  {typedCustomer.transactionCount > 5
+                                    ? "VIP"
+                                    : typedCustomer.transactionCount > 2
+                                    ? "Regular"
+                                    : "New"}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1631,30 +1637,33 @@ export default function Reports() {
                           searchTerm,
                           sortBy,
                           sortOrder
-                        ).map((category: CategorySalesData, index: number) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-gray-900">
-                                {category.name}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                              {formatCurrency(category.totalSales)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {category.itemCount}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {formatCurrency(category.averagePrice)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {category.commissionRate}%
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {category.marketShare}%
-                            </td>
-                          </tr>
-                        ))}
+                        ).map((category, index: number) => {
+                          const typedCategory = category as CategorySalesData;
+                          return (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm font-medium text-gray-900">
+                                  {typedCategory.name}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                                {formatCurrency(typedCategory.totalSales)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatNumber(typedCategory.itemCount)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatCurrency(typedCategory.averagePrice)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatNumber(typedCategory.commissionRate)}%
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatNumber(typedCategory.marketShare)}%
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1762,47 +1771,47 @@ export default function Reports() {
                           searchTerm,
                           sortBy,
                           sortOrder
-                        ).map(
-                          (
-                            employee: {
-                              name: string;
-                              totalSales: number;
-                              commission: number;
-                              itemsSold: number;
-                            },
-                            index: number
-                          ) => (
+                        ).map((employee, index: number) => {
+                          const typedEmployee = employee as {
+                            name: string;
+                            totalSales: number;
+                            commission: number;
+                            itemsSold: number;
+                          };
+                          return (
                             <tr key={index} className="hover:bg-gray-50">
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="flex items-center">
                                   <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-full flex items-center justify-center mr-3">
                                     <span className="text-white font-bold text-sm">
-                                      {employee.name.charAt(0).toUpperCase()}
+                                      {typedEmployee.name
+                                        .charAt(0)
+                                        .toUpperCase()}
                                     </span>
                                   </div>
                                   <div className="text-sm font-medium text-gray-900">
-                                    {employee.name}
+                                    {typedEmployee.name}
                                   </div>
                                 </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                                {formatCurrency(employee.totalSales)}
+                                {formatCurrency(typedEmployee.totalSales)}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                                {formatCurrency(employee.commission)}
+                                {formatCurrency(typedEmployee.commission)}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {employee.itemsSold}
+                                {formatNumber(typedEmployee.itemsSold)}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {formatCurrency(
-                                  employee.totalSales /
-                                    Math.max(employee.itemsSold, 1)
+                                  typedEmployee.totalSales /
+                                    Math.max(typedEmployee.itemsSold, 1)
                                 )}
                               </td>
                             </tr>
-                          )
-                        )}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
