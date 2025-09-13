@@ -1,0 +1,218 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id          String    @id @default(cuid())
+  name        String
+  email       String?   @unique
+  phone       String
+  address     String?
+  dateOfBirth DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  sales Sale[]
+
+  @@map("customers")
+}
+
+model Employee {
+  id             String   @id @default(cuid())
+  name           String
+  email          String   @unique
+  phone          String
+  commissionRate Float    @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  employeeRoles EmployeeRole[]
+  sales         SaleItem[]
+
+  @@map("employees")
+}
+
+model EmployeeRole {
+  id         String @id @default(cuid())
+  employeeId String
+  roleId     String
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  role     UserRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, roleId])
+  @@map("employee_roles")
+}
+
+model UserRole {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categoryRoles CategoryRole[]
+  employeeRoles EmployeeRole[]
+
+  @@map("user_roles")
+}
+
+model Category {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  commissionRate   Float    @default(0)
+  salonOwnerRate   Float    @default(0)
+  description      String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  items         Item[]
+  categoryRoles CategoryRole[]
+
+  @@map("categories")
+}
+
+model CategoryRole {
+  id         String @id @default(cuid())
+  categoryId String
+  roleId     String
+
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  role     UserRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, roleId])
+  @@map("category_roles")
+}
+
+model Item {
+  id          String   @id @default(cuid())
+  name        String
+  categoryId  String
+  price       Float
+  stock       Int      @default(0)
+  isService   Boolean  @default(false)
+  description String?
+  averageCost Float?   @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  saleItems       SaleItem[]
+  inventoryRecords InventoryRecord[]
+  inventoryBatches InventoryBatch[]
+
+  @@map("items")
+}
+
+model Sale {
+  id          String   @id @default(cuid())
+  date        DateTime @default(now())
+  customerId  String?
+  subtotal    Float
+  tax         Float
+  total       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customer Customer?   @relation(fields: [customerId], references: [id])
+  items    SaleItem[]
+  inventoryRecords InventoryRecord[]
+
+  @@map("sales")
+}
+
+model SaleItem {
+  id           String  @id @default(cuid())
+  saleId       String
+  itemId       String
+  employeeId   String
+  quantity     Int
+  price        Float
+  total        Float
+  createdAt    DateTime @default(now())
+
+  sale     Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  item     Item     @relation(fields: [itemId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("sale_items")
+}
+
+model InventoryRecord {
+  id        String   @id @default(cuid())
+  date      DateTime @default(now())
+  itemId    String
+  saleId    String?
+  type      String   // Purchase, Usage, Return, Adjustment
+  quantity  Int
+  unitCost  Float
+  totalCost Float
+  cogsTotal Float?   @default(0)
+  createdAt DateTime @default(now())
+
+  item Item  @relation(fields: [itemId], references: [id])
+  sale Sale? @relation(fields: [saleId], references: [id])
+
+  @@map("inventory_records")
+}
+
+model InventoryBatch {
+  id                String   @id @default(cuid())
+  itemId            String
+  quantity          Int
+  unitCost          Float
+  type              String   // Purchase, Return, Adjustment
+  date              DateTime @default(now())
+  remainingQuantity Int
+  createdAt         DateTime @default(now())
+
+  item Item @relation(fields: [itemId], references: [id])
+
+  @@map("inventory_batches")
+}
+
+model Expense {
+  id            String   @id @default(cuid())
+  date          DateTime @default(now())
+  description   String
+  categoryId    String
+  amount        Float
+  paymentMethod String
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  category ExpenseCategory @relation(fields: [categoryId], references: [id])
+
+  @@map("expenses")
+}
+
+model ExpenseCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  expenses Expense[]
+
+  @@map("expense_categories")
+}
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
