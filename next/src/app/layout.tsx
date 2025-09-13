@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "POS System - Salon Management",
-  description: "Professional salon point of sale and management system",
+  title: "Enchante by Remy Daher - Salon Management",
+  description:
+    "Professional salon point of sale and management system by Remy Daher",
 };
 
 export default function RootLayout({

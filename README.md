@@ -1,4 +1,4 @@
-# Professional POS System
+# Enchante by Remy Daher
 
 ## Complete Business Management Solution for Salons, Spas & Retail
 
@@ -11,7 +11,7 @@
 
 ## 🏪 **What is This System?**
 
-A modern, comprehensive Point of Sale (POS) system specifically designed for **salons, spas, and retail businesses**. This system handles everything from daily transactions to detailed financial reporting, employee management, and customer relationships.
+A modern, comprehensive Point of Sale (POS) system specifically designed for **salons, spas, and retail businesses** by Remy Daher. This system handles everything from daily transactions to detailed financial reporting, employee management, and customer relationships.
 
 **Perfect for businesses that need:**
 

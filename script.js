@@ -1,4 +1,4 @@
-// POS System JavaScript
+// Enchante by Remy Daher - POS System JavaScript
 class POSSystem {
   constructor() {
     this.customers = this.loadData("customers") || [];

@@ -107,7 +107,7 @@ export default function Home() {
                   </div>
                   <div>
                     <h1 className="text-xl font-bold text-gray-900">
-                      SalonPOS
+                      Enchante by Remy Daher
                     </h1>
                     <p className="text-xs text-gray-600">Point of Sale</p>
                   </div>
@@ -176,7 +176,7 @@ export default function Home() {
                       </div>
                       <div>
                         <h1 className="text-xl font-bold text-gray-900">
-                          SalonPOS
+                          Enchante by Remy Daher
                         </h1>
                         <p className="text-sm text-gray-600">Management</p>
                       </div>
@@ -228,7 +228,9 @@ export default function Home() {
                   <ShoppingCart className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">SalonPOS</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    Enchante by Remy Daher
+                  </h1>
                   <p className="text-sm text-gray-600 font-medium">
                     Professional Management
                   </p>
@@ -396,7 +398,7 @@ export default function Home() {
                       </div>
                       <div>
                         <h1 className="text-xl font-bold text-gray-900">
-                          SalonPOS
+                          Enchante by Remy Daher
                         </h1>
                         <p className="text-sm text-gray-600">Management</p>
                       </div>
