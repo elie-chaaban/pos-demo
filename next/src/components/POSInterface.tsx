@@ -323,12 +323,6 @@ export default function POSInterface() {
       <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-6">
-            <div className="flex items-center space-x-2">
-              <div className="status-online"></div>
-              <span className="text-sm font-semibold text-gray-700">
-                System Online
-              </span>
-            </div>
             <div className="flex items-center space-x-4">
               <div className="text-center">
                 <div className="text-lg font-bold text-indigo-600">

@@ -325,15 +325,6 @@ body {
   left: 100%;
 }
 
-/* Status indicators */
-.status-online {
-  @apply w-2 h-2 bg-green-500 rounded-full animate-pulse;
-}
-
-.status-offline {
-  @apply w-2 h-2 bg-gray-400 rounded-full;
-}
-
 /* Modern input styles */
 .input-modern {
   @apply w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200;

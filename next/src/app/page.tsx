@@ -101,6 +101,7 @@ export default function Home() {
                 >
                   <Menu className="w-5 h-5" />
                 </button>
+
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
                     <ShoppingCart className="w-5 h-5 text-white" />
@@ -232,7 +233,7 @@ export default function Home() {
                     Enchante by Remy Daher
                   </h1>
                   <p className="text-sm text-gray-600 font-medium">
-                    Professional Management
+                    Management
                   </p>
                 </div>
               </div>
@@ -281,13 +282,7 @@ export default function Home() {
             {/* Sidebar Footer */}
             <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-100 bg-white/50 backdrop-blur-sm">
               <div className="text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <div className="status-online"></div>
-                  <span className="text-sm font-medium text-gray-600">
-                    System Online
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500">Version 2.0.0</p>
+                <p className="text-xs text-gray-500">Enchante by Remy Daher</p>
               </div>
             </div>
           </div>
@@ -306,6 +301,7 @@ export default function Home() {
                     >
                       <Menu className="w-6 h-6" />
                     </button>
+
                     <div>
                       <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 capitalize">
                         {navigation.find((nav) => nav.id === activeSection)

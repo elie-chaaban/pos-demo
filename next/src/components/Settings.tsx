@@ -241,25 +241,6 @@ export default function Settings() {
             </div>
           </div>
         </div>
-
-        {/* System Information */}
-        <div className="bg-gray-50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">System Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
-            <div>
-              <strong>Version:</strong> 1.0.0
-            </div>
-            <div>
-              <strong>Database:</strong> SQLite
-            </div>
-            <div>
-              <strong>Framework:</strong> Next.js 14
-            </div>
-            <div>
-              <strong>Last Updated:</strong> {new Date().toLocaleDateString()}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
