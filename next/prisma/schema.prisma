@@ -130,14 +130,18 @@ model Sale {
 }
 
 model SaleItem {
-  id           String  @id @default(cuid())
-  saleId       String
-  itemId       String
-  employeeId   String
-  quantity     Int
-  price        Float
-  total        Float
-  createdAt    DateTime @default(now())
+  id                String  @id @default(cuid())
+  saleId            String
+  itemId            String
+  employeeId        String
+  quantity          Int
+  price             Float
+  total             Float
+  commissionRate    Float?  @default(0)
+  salonOwnerRate    Float?  @default(0)
+  commissionAmount  Float?  @default(0)
+  salonOwnerAmount  Float?  @default(0)
+  createdAt         DateTime @default(now())
 
   sale     Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
   item     Item     @relation(fields: [itemId], references: [id])

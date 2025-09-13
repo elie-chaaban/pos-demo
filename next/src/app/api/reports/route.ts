@@ -81,10 +81,13 @@ export async function GET(request: NextRequest) {
           const category = saleItem.item.category;
           const employee = saleItem.employee;
 
-          // Calculate employee commission
+          // Use stored commission amounts (fallback to calculated if not stored)
           const employeeCommission =
+            saleItem.commissionAmount ??
             (itemTotal * category.commissionRate) / 100;
-          const salonOwnerShare = (itemTotal * category.salonOwnerRate) / 100;
+          const salonOwnerShare =
+            saleItem.salonOwnerAmount ??
+            (itemTotal * category.salonOwnerRate) / 100;
 
           revenueData.employeeEarnings += employeeCommission;
           revenueData.salonOwnerEarnings += salonOwnerShare;

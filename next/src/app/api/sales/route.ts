@@ -41,11 +41,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (subtotal === undefined || tax === undefined || total === undefined) {
-      return NextResponse.json(
-        { error: "Subtotal, tax, and total are required" },
-        { status: 400 }
-      );
+    if (total === undefined) {
+      return NextResponse.json({ error: "Total is required" }, { status: 400 });
     }
 
     // Create the sale with items in a transaction
@@ -54,8 +51,8 @@ export async function POST(request: NextRequest) {
       const newSale = await tx.sale.create({
         data: {
           customerId: customerId || null,
-          subtotal,
-          tax,
+          subtotal: total, // Use total as subtotal
+          tax: 0, // No tax
           total,
         },
       });
@@ -64,7 +61,23 @@ export async function POST(request: NextRequest) {
       for (const item of items) {
         const { itemId, employeeId, quantity, price, total: itemTotal } = item;
 
-        // Create sale item
+        // Get item details to check if it's a product (needs stock tracking)
+        const itemDetails = await tx.item.findUnique({
+          where: { id: itemId },
+          include: { category: true },
+        });
+
+        if (!itemDetails) {
+          throw new Error(`Item with id ${itemId} not found`);
+        }
+
+        // Calculate commission amounts using current rates
+        const commissionRate = itemDetails.category.commissionRate;
+        const salonOwnerRate = itemDetails.category.salonOwnerRate;
+        const commissionAmount = (itemTotal * commissionRate) / 100;
+        const salonOwnerAmount = (itemTotal * salonOwnerRate) / 100;
+
+        // Create sale item with commission data
         await tx.saleItem.create({
           data: {
             saleId: newSale.id,
@@ -73,13 +86,11 @@ export async function POST(request: NextRequest) {
             quantity,
             price,
             total: itemTotal,
+            commissionRate,
+            salonOwnerRate,
+            commissionAmount,
+            salonOwnerAmount,
           },
-        });
-
-        // Get item details to check if it's a product (needs stock tracking)
-        const itemDetails = await tx.item.findUnique({
-          where: { id: itemId },
-          include: { category: true },
         });
 
         if (itemDetails) {

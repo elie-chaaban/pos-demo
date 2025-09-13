@@ -1137,15 +1137,24 @@ class POSSystem {
         const employee = this.employees.find(
           (emp) => emp.id === cartItem.employeeId
         );
+        const category = this.categories.find(
+          (cat) => cat.id === item.categoryId
+        );
+        const itemTotal = item.price * cartItem.quantity;
+
         return {
           itemId: cartItem.id,
           name: item.name,
           quantity: cartItem.quantity,
           price: item.price,
-          total: item.price * cartItem.quantity,
+          total: itemTotal,
           employeeId: employee.id,
           employeeName: employee.name,
           categoryId: item.categoryId,
+          commissionRate: category.commissionRate,
+          salonOwnerRate: category.salonOwnerRate,
+          commissionAmount: (itemTotal * category.commissionRate) / 100,
+          salonOwnerAmount: (itemTotal * category.salonOwnerRate) / 100,
         };
       }),
       subtotal: subtotal,
@@ -1191,13 +1200,9 @@ class POSSystem {
     const employeeCommissions = {};
 
     sale.items.forEach((saleItem) => {
-      const category = this.categories.find(
-        (cat) => cat.id === saleItem.categoryId
-      );
-      const employeeCommission =
-        (saleItem.total * category.commissionRate) / 100;
-      const salonOwnerRevenue =
-        (saleItem.total * category.salonOwnerRate) / 100;
+      // Use stored commission amounts
+      const employeeCommission = saleItem.commissionAmount;
+      const salonOwnerRevenue = saleItem.salonOwnerAmount;
       totalCommission += employeeCommission;
       totalSalonOwnerRevenue += salonOwnerRevenue;
 
@@ -1985,13 +1990,19 @@ class POSSystem {
       totalRevenue += sale.total;
 
       sale.items.forEach((saleItem) => {
-        const category = this.categories.find(
-          (cat) => cat.id === saleItem.categoryId
-        );
+        // Use stored commission amounts (fallback to calculated if not stored)
         const employeeCommission =
-          (saleItem.total * category.commissionRate) / 100;
+          saleItem.commissionAmount ??
+          (saleItem.total *
+            (this.categories.find((cat) => cat.id === saleItem.categoryId)
+              ?.commissionRate || 0)) /
+            100;
         const salonOwnerRevenue =
-          (saleItem.total * category.salonOwnerRate) / 100;
+          saleItem.salonOwnerAmount ??
+          (saleItem.total *
+            (this.categories.find((cat) => cat.id === saleItem.categoryId)
+              ?.salonOwnerRate || 0)) /
+            100;
         totalEmployeeCommission += employeeCommission;
         totalSalonOwnerRevenue += salonOwnerRevenue;
       });
@@ -2038,9 +2049,12 @@ class POSSystem {
         const category = this.categories.find(
           (cat) => cat.id === item.categoryId
         );
+        // Use stored commission amounts (fallback to calculated if not stored)
         const employeeCommission =
+          saleItem.commissionAmount ??
           (saleItem.total * category.commissionRate) / 100;
         const salonOwnerRevenue =
+          saleItem.salonOwnerAmount ??
           (saleItem.total * category.salonOwnerRate) / 100;
         totalEmployeeCommission += employeeCommission;
         totalSalonOwnerRevenue += salonOwnerRevenue;
@@ -2099,7 +2113,9 @@ class POSSystem {
         const category = this.categories.find(
           (cat) => cat.id === saleItem.categoryId
         );
+        // Use stored commission amounts (fallback to calculated if not stored)
         const employeeCommission =
+          saleItem.commissionAmount ??
           (saleItem.total * category.commissionRate) / 100;
 
         const employee = this.employees.find(
@@ -2671,9 +2687,12 @@ class POSSystem {
         const category = this.categories.find(
           (cat) => cat.id === item.categoryId
         );
+        // Use stored commission amounts (fallback to calculated if not stored)
         const employeeCommission =
+          saleItem.commissionAmount ??
           (saleItem.total * category.commissionRate) / 100;
         const salonOwnerRevenue =
+          saleItem.salonOwnerAmount ??
           (saleItem.total * category.salonOwnerRate) / 100;
         expectedGilbertCommission += employeeCommission;
         expectedSalonOwnerRevenue += salonOwnerRevenue;
