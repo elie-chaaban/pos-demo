@@ -4,6 +4,11 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const inventoryRecords = await prisma.inventoryRecord.findMany({
+      where: {
+        item: {
+          isService: false, // Only show inventory records for stock items, not services
+        },
+      },
       include: {
         item: {
           include: {
@@ -49,6 +54,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if the item is a service - services shouldn't have inventory records
+    const item = await prisma.item.findUnique({
+      where: { id: itemId },
+    });
+
+    if (!item) {
+      return NextResponse.json({ error: "Item not found" }, { status: 404 });
+    }
+
+    if (item.isService) {
+      return NextResponse.json(
+        { error: "Cannot create inventory records for services" },
+        { status: 400 }
+      );
+    }
+
     const totalCost = quantity * unitCost;
 
     // Create inventory record in a transaction
@@ -74,25 +95,26 @@ export async function POST(request: NextRequest) {
       });
 
       // Update item stock and average cost
-      const item = await tx.item.findUnique({
+      const itemForUpdate = await tx.item.findUnique({
         where: { id: itemId },
       });
 
-      if (!item) {
+      if (!itemForUpdate) {
         throw new Error("Item not found");
       }
 
-      let newStock = item.stock;
-      let newAverageCost = item.averageCost || 0;
+      let newStock = itemForUpdate.stock;
+      let newAverageCost = itemForUpdate.averageCost || 0;
 
       if (type === "Purchase" || type === "Return") {
         // Add to stock
         newStock += quantity;
 
         // Update average cost using weighted average
-        const currentValue = (item.averageCost || 0) * item.stock;
+        const currentValue =
+          (itemForUpdate.averageCost || 0) * itemForUpdate.stock;
         const newValue = totalCost;
-        const totalQuantity = item.stock + quantity;
+        const totalQuantity = itemForUpdate.stock + quantity;
 
         if (totalQuantity > 0) {
           newAverageCost = (currentValue + newValue) / totalQuantity;

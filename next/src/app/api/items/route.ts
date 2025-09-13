@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const forInventory = searchParams.get("forInventory") === "true";
+
     const items = await prisma.item.findMany({
+      where: forInventory ? ({ isService: false } as any) : undefined,
       include: {
         category: {
           include: {
@@ -47,7 +51,7 @@ export async function POST(request: NextRequest) {
         stock: isService ? 0 : stock || 0, // Services don't have stock
         isService: isService || false,
         description: description || "",
-      },
+      } as any,
       include: {
         category: true,
       },

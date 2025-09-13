@@ -377,13 +377,12 @@ export default function POSInterface() {
               </div>
             </div>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search products and services..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="input-modern pl-10 text-sm"
+                className="input-modern text-sm"
               />
             </div>
           </div>

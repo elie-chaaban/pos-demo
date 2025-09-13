@@ -37,6 +37,7 @@ interface Item {
   };
   stock: number;
   averageCost: number;
+  isService: boolean;
 }
 
 export default function InventoryManagement() {
@@ -76,9 +77,11 @@ export default function InventoryManagement() {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch("/api/items");
+      const response = await fetch("/api/items?forInventory=true");
       const data = await response.json();
-      setItems(data);
+      // Filter out services on frontend as backup
+      const stockItems = data.filter((item: Item) => !item.isService);
+      setItems(stockItems);
     } catch (error) {
       console.error("Error fetching items:", error);
     }
@@ -179,21 +182,6 @@ export default function InventoryManagement() {
       quantity: 0,
       unitCost: 0,
     });
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "Purchase":
-        return "bg-green-100 text-green-800";
-      case "Usage":
-        return "bg-red-100 text-red-800";
-      case "Return":
-        return "bg-blue-100 text-blue-800";
-      case "Adjustment":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
   };
 
   const formatCurrency = (amount: number) => {
