@@ -4,17 +4,14 @@ import { calculateCOGS } from "@/lib/costing";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const inventoryRecord = await prisma.inventoryRecord.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
-        item: {
-          include: {
-            category: true,
-          },
-        },
+        item: true,
         sale: {
           include: {
             customer: true,
@@ -42,9 +39,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { date, itemId, type, quantity, unitCost, notes } = body;
 
@@ -70,7 +68,7 @@ export async function PUT(
     const result = await prisma.$transaction(async (tx) => {
       // Get the original record
       const originalRecord = await tx.inventoryRecord.findUnique({
-        where: { id: params.id },
+        where: { id },
       });
 
       if (!originalRecord) {
@@ -79,7 +77,7 @@ export async function PUT(
 
       // Update the inventory record
       const inventoryRecord = await tx.inventoryRecord.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           date: date ? new Date(date) : originalRecord.date,
           itemId,
@@ -90,11 +88,7 @@ export async function PUT(
           cogsTotal: type === "Usage" ? totalCost : 0,
         },
         include: {
-          item: {
-            include: {
-              category: true,
-            },
-          },
+          item: true,
         },
       });
 
@@ -126,7 +120,7 @@ export async function PUT(
           currentStock = Math.max(0, currentStock - record.quantity);
 
           // For usage records, recalculate COGS if this is the record being updated
-          if (record.id === params.id && type === "Usage") {
+          if (record.id === id && type === "Usage") {
             const cogsResult = await calculateCOGS(
               tx,
               itemId,
@@ -165,14 +159,15 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     // Delete inventory record in a transaction
     await prisma.$transaction(async (tx) => {
       // Get the record to find the item
       const record = await tx.inventoryRecord.findUnique({
-        where: { id: params.id },
+        where: { id },
       });
 
       if (!record) {
@@ -181,7 +176,7 @@ export async function DELETE(
 
       // Delete the record
       await tx.inventoryRecord.delete({
-        where: { id: params.id },
+        where: { id },
       });
 
       // Recalculate item stock and average cost

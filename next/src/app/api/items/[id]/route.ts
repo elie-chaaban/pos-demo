@@ -3,14 +3,12 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const item = await prisma.item.findUnique({
-      where: { id: params.id },
-      include: {
-        category: true,
-      },
+      where: { id },
     });
 
     if (!item) {
@@ -29,13 +27,14 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
-    const { name, categoryId, price, stock, isService, description } = body;
+    const { name, price, stock, isService, description } = body;
 
-    if (!name || !categoryId || price === undefined) {
+    if (!name || price === undefined) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -43,17 +42,13 @@ export async function PUT(
     }
 
     const item = await prisma.item.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
-        categoryId,
         price,
         stock: isService ? 0 : stock || 0, // Services don't have stock
         isService: isService || false,
         description: description || "",
-      },
-      include: {
-        category: true,
       },
     });
 
@@ -69,11 +64,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.item.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Item deleted successfully" });

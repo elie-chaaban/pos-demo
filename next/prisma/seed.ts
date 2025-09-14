@@ -19,47 +19,7 @@ async function main() {
     },
   });
 
-  // Create user roles first
-  const userRoles = [
-    {
-      id: "role1",
-      name: "Hairdresser",
-      description:
-        "Professional hair stylist who can perform haircuts, styling, coloring, and treatments",
-    },
-    {
-      id: "role2",
-      name: "Nail Technician",
-      description:
-        "Professional nail technician who can perform manicures, pedicures, and nail art",
-    },
-    {
-      id: "role3",
-      name: "Salon Owner",
-      description:
-        "Salon owner with full access to all services and management functions",
-    },
-    {
-      id: "role4",
-      name: "Receptionist",
-      description:
-        "Front desk staff who can handle appointments and basic customer service",
-    },
-    {
-      id: "role5",
-      name: "Laser Technician",
-      description:
-        "Certified laser technician for hair removal and skin treatments",
-    },
-  ];
-
-  for (const role of userRoles) {
-    await prisma.userRole.upsert({
-      where: { id: role.id },
-      update: {},
-      create: role,
-    });
-  }
+  // Note: User roles removed - no longer needed with direct employee-service assignments
 
   // Create expense categories
   const expenseCategories = [
@@ -115,107 +75,7 @@ async function main() {
   }
 
   // Create service/product categories
-  const categories = [
-    {
-      id: "cat1",
-      name: "Hair Services",
-      commissionRate: 70,
-      salonOwnerRate: 30,
-      description:
-        "All hair services: haircut, styling, coloring, treatments, etc.",
-    },
-    {
-      id: "cat2",
-      name: "Hair Extensions",
-      commissionRate: 80,
-      salonOwnerRate: 20,
-      description: "All types of hair extensions: sales, refill, or rent",
-    },
-    {
-      id: "cat3",
-      name: "Hair Products & Accessories",
-      commissionRate: 95,
-      salonOwnerRate: 5,
-      description:
-        "Shampoo, conditioners, hair masks, serums, accessories, etc.",
-    },
-    {
-      id: "cat4",
-      name: "Nail Services",
-      salonOwnerRate: 100,
-      description: "All nail services: manicure, pedicure, nail art, etc.",
-    },
-    {
-      id: "cat5",
-      name: "Nail Products",
-      salonOwnerRate: 100,
-      description: "Nail polish, nail art supplies, nail care products, etc.",
-    },
-    {
-      id: "cat6",
-      name: "Face Treatments",
-      salonOwnerRate: 100,
-      description: "Face masks, facial treatments, skincare services, etc.",
-    },
-    {
-      id: "cat7",
-      name: "Laser Services",
-      commissionRate: 50,
-      salonOwnerRate: 50,
-      description: "Laser hair removal, skin treatments, and related services",
-    },
-  ];
-
-  for (const category of categories) {
-    await prisma.category.upsert({
-      where: { id: category.id },
-      update: {},
-      create: category,
-    });
-  }
-
-  // Create category-role relationships
-  const categoryRoles = [
-    // Hair Services - Hairdresser and Salon Owner
-    { categoryId: "cat1", roleId: "role1" },
-    { categoryId: "cat1", roleId: "role3" },
-
-    // Hair Extensions - Hairdresser and Salon Owner
-    { categoryId: "cat2", roleId: "role1" },
-    { categoryId: "cat2", roleId: "role3" },
-
-    // Hair Products - Hairdresser and Salon Owner
-    { categoryId: "cat3", roleId: "role1" },
-    { categoryId: "cat3", roleId: "role3" },
-
-    // Nail Services - Nail Technician and Salon Owner
-    { categoryId: "cat4", roleId: "role2" },
-    { categoryId: "cat4", roleId: "role3" },
-
-    // Nail Products - Nail Technician and Salon Owner
-    { categoryId: "cat5", roleId: "role2" },
-    { categoryId: "cat5", roleId: "role3" },
-
-    // Face Treatments - Salon Owner only
-    { categoryId: "cat6", roleId: "role3" },
-
-    // Laser Services - Laser Technician and Salon Owner
-    { categoryId: "cat7", roleId: "role5" },
-    { categoryId: "cat7", roleId: "role3" },
-  ];
-
-  for (const categoryRole of categoryRoles) {
-    await prisma.categoryRole.upsert({
-      where: {
-        categoryId_roleId: {
-          categoryId: categoryRole.categoryId,
-          roleId: categoryRole.roleId,
-        },
-      },
-      update: {},
-      create: categoryRole,
-    });
-  }
+  // Note: Categories removed - no longer using item categories
 
   // Create employees
   const employees = [
@@ -259,38 +119,7 @@ async function main() {
     });
   }
 
-  // Create employee-role relationships
-  const employeeRoles = [
-    // Gilbert - Hairdresser and Salon Owner (can do both)
-    { employeeId: "emp1", roleId: "role1" }, // Hairdresser
-    { employeeId: "emp1", roleId: "role3" }, // Salon Owner
-
-    // elie - Salon Owner only
-    { employeeId: "emp2", roleId: "role3" }, // Salon Owner
-
-    // Sarah - Nail Technician
-    { employeeId: "emp3", roleId: "role2" }, // Nail Technician
-
-    // Mike - Receptionist
-    { employeeId: "emp4", roleId: "role4" }, // Receptionist
-
-    // Lisa - Laser Technician and Salon Owner (can manage and perform)
-    { employeeId: "emp5", roleId: "role5" }, // Laser Technician
-    { employeeId: "emp5", roleId: "role3" }, // Salon Owner
-  ];
-
-  for (const employeeRole of employeeRoles) {
-    await prisma.employeeRole.upsert({
-      where: {
-        employeeId_roleId: {
-          employeeId: employeeRole.employeeId,
-          roleId: employeeRole.roleId,
-        },
-      },
-      update: {},
-      create: employeeRole,
-    });
-  }
+  // Note: Employee-role relationships removed - now using direct employee-service assignments
 
   // Create customers
   const customers = [
@@ -330,46 +159,82 @@ async function main() {
     {
       id: "item1",
       name: "Haircut & Style",
-      categoryId: "cat1",
       price: 45.0,
       stock: 0,
+      isService: true,
       description: "Professional haircut and styling service",
       averageCost: 0,
     },
     {
       id: "item2",
       name: "Hair Color",
-      categoryId: "cat1",
       price: 85.0,
       stock: 0,
+      isService: true,
       description: "Full hair coloring service",
       averageCost: 0,
     },
     {
       id: "item3",
       name: "Manicure",
-      categoryId: "cat4",
       price: 25.0,
       stock: 0,
+      isService: true,
       description: "Basic manicure service",
       averageCost: 0,
     },
     {
       id: "item4",
       name: "Shampoo Bottle",
-      categoryId: "cat3",
       price: 15.0,
       stock: 50,
+      isService: false,
       description: "Professional shampoo 500ml",
       averageCost: 8.0,
     },
     {
       id: "item5",
       name: "Laser Hair Removal - Face",
-      categoryId: "cat7",
       price: 75.0,
       stock: 0,
+      isService: true,
       description: "Laser hair removal treatment for facial area",
+      averageCost: 0,
+    },
+    {
+      id: "item6",
+      name: "Hair Treatment",
+      price: 65.0,
+      stock: 0,
+      isService: true,
+      description: "Deep conditioning hair treatment",
+      averageCost: 0,
+    },
+    {
+      id: "item7",
+      name: "Pedicure",
+      price: 35.0,
+      stock: 0,
+      isService: true,
+      description: "Professional pedicure service",
+      averageCost: 0,
+    },
+    {
+      id: "item8",
+      name: "Nail Art",
+      price: 45.0,
+      stock: 0,
+      isService: true,
+      description: "Custom nail art design",
+      averageCost: 0,
+    },
+    {
+      id: "item9",
+      name: "Facial Treatment",
+      price: 80.0,
+      stock: 0,
+      isService: true,
+      description: "Professional facial treatment",
       averageCost: 0,
     },
   ];
@@ -379,6 +244,51 @@ async function main() {
       where: { id: item.id },
       update: {},
       create: item,
+    });
+  }
+
+  // Create employee-service assignments (replaces category-role system)
+  const employeeServices = [
+    // Gilbert (Hairdresser + Salon Owner) - Hair services and products
+    { employeeId: "emp1", itemId: "item1", commissionRate: 15 }, // Haircut & Style
+    { employeeId: "emp1", itemId: "item2", commissionRate: 20 }, // Hair Color
+    { employeeId: "emp1", itemId: "item4", commissionRate: 5 }, // Shampoo Bottle
+    { employeeId: "emp1", itemId: "item6", commissionRate: 15 }, // Hair Treatment
+
+    // elie (Salon Owner) - All services and products
+    { employeeId: "emp2", itemId: "item1", commissionRate: 10 }, // Haircut & Style
+    { employeeId: "emp2", itemId: "item2", commissionRate: 15 }, // Hair Color
+    { employeeId: "emp2", itemId: "item3", commissionRate: 20 }, // Manicure
+    { employeeId: "emp2", itemId: "item4", commissionRate: 5 }, // Shampoo Bottle
+    { employeeId: "emp2", itemId: "item5", commissionRate: 25 }, // Laser Hair Removal - Face
+    { employeeId: "emp2", itemId: "item6", commissionRate: 15 }, // Hair Treatment
+    { employeeId: "emp2", itemId: "item7", commissionRate: 25 }, // Pedicure
+    { employeeId: "emp2", itemId: "item8", commissionRate: 20 }, // Nail Art
+    { employeeId: "emp2", itemId: "item9", commissionRate: 30 }, // Facial Treatment
+
+    // Sarah (Nail Technician) - Nail services and products
+    { employeeId: "emp3", itemId: "item3", commissionRate: 20 }, // Manicure
+    { employeeId: "emp3", itemId: "item7", commissionRate: 25 }, // Pedicure
+    { employeeId: "emp3", itemId: "item8", commissionRate: 20 }, // Nail Art
+
+    // Mike (Receptionist) - Products only (no services)
+    { employeeId: "emp4", itemId: "item4", commissionRate: 3 }, // Shampoo Bottle
+
+    // Lisa (Laser Technician + Salon Owner) - Laser services and face treatments
+    { employeeId: "emp5", itemId: "item5", commissionRate: 25 }, // Laser Hair Removal - Face
+    { employeeId: "emp5", itemId: "item9", commissionRate: 30 }, // Facial Treatment
+  ];
+
+  for (const employeeService of employeeServices) {
+    await (prisma as any).employeeService.upsert({
+      where: {
+        employeeId_itemId: {
+          employeeId: employeeService.employeeId,
+          itemId: employeeService.itemId,
+        },
+      },
+      update: {},
+      create: employeeService,
     });
   }
 

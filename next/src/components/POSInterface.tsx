@@ -12,67 +12,32 @@ import {
 import { formatCurrency, formatNumber } from "../lib/utils";
 import { toast } from "sonner";
 import LoadingButton from "./LoadingButton";
-
-interface Item {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  isService: boolean;
-  description?: string;
-  category: {
-    id: string;
-    name: string;
-    commissionRate: number;
-    salonOwnerRate: number;
-    categoryRoles: {
-      role: {
-        id: string;
-        name: string;
-      };
-    }[];
-  };
-}
-
-interface Employee {
-  id: string;
-  name: string;
-  employeeRoles: {
-    role: {
-      id: string;
-      name: string;
-    };
-  }[];
-}
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-}
-
-interface CartItem {
-  id: string;
-  quantity: number;
-  employeeId: string;
-}
+import {
+  Item,
+  EmployeeWithCommission,
+  Customer,
+  CartItem,
+  CustomerFormData,
+} from "../types";
 
 export default function POSInterface() {
   const [items, setItems] = useState<Item[]>([]);
-  const [employees, setEmployees] = useState<Employee[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [loading, setLoading] = useState(true);
   const [showAddCustomer, setShowAddCustomer] = useState(false);
-  const [newCustomer, setNewCustomer] = useState({
+  const [newCustomer, setNewCustomer] = useState<CustomerFormData>({
     name: "",
     email: "",
     phone: "",
     address: "",
     dateOfBirth: "",
   });
+  const [itemEmployees, setItemEmployees] = useState<
+    Record<string, EmployeeWithCommission[]>
+  >({});
 
   useEffect(() => {
     fetchData();
@@ -80,28 +45,46 @@ export default function POSInterface() {
 
   const fetchData = async () => {
     try {
-      const [itemsRes, employeesRes, customersRes] = await Promise.all([
+      const [itemsRes, customersRes] = await Promise.all([
         fetch("/api/items"),
-        fetch("/api/employees"),
         fetch("/api/customers"),
       ]);
 
-      const [itemsData, employeesData, customersData] = await Promise.all([
+      const [itemsData, customersData] = await Promise.all([
         itemsRes.json(),
-        employeesRes.json(),
         customersRes.json(),
       ]);
 
       // Ensure we always set arrays, even if API returns errors
-      setItems(Array.isArray(itemsData) ? itemsData : []);
-      setEmployees(Array.isArray(employeesData) ? employeesData : []);
-      setCustomers(Array.isArray(customersData) ? customersData : []);
+      const itemsArray = Array.isArray(itemsData) ? itemsData : [];
+      const customersArray = Array.isArray(customersData) ? customersData : [];
+
+      setItems(itemsArray);
+      setCustomers(customersArray);
+
+      // Fetch employees for each item
+      const itemEmployeesMap: Record<string, EmployeeWithCommission[]> = {};
+      for (const item of itemsArray) {
+        try {
+          const response = await fetch(`/api/items/${item.id}/employees`);
+          if (response.ok) {
+            const assignedEmployees = await response.json();
+            itemEmployeesMap[item.id] = assignedEmployees;
+          } else {
+            itemEmployeesMap[item.id] = [];
+          }
+        } catch (error) {
+          console.error(`Error fetching employees for item ${item.id}:`, error);
+          itemEmployeesMap[item.id] = [];
+        }
+      }
+      setItemEmployees(itemEmployeesMap);
     } catch (error) {
       console.error("Error fetching data:", error);
       // Set empty arrays on error to prevent filter issues
       setItems([]);
-      setEmployees([]);
       setCustomers([]);
+      setItemEmployees({});
     } finally {
       setLoading(false);
     }
@@ -135,13 +118,15 @@ export default function POSInterface() {
         )
       );
     } else {
-      // Get appropriate employee based on category
-      const filteredEmployees = getFilteredEmployeesForItem(itemId);
-      const defaultEmployee = filteredEmployees[0] || employees[0];
+      // Get employees assigned to this specific item
+      const assignedEmployees = itemEmployees[itemId] || [];
+      const defaultEmployee = assignedEmployees[0];
 
-      // Check if we have a valid employee
+      // Check if we have a valid employee assigned to this item
       if (!defaultEmployee) {
-        toast.error("No employee available. Please add an employee first.");
+        toast.error(
+          `No employee assigned to "${item.name}". Please assign an employee to this item first.`
+        );
         return;
       }
 
@@ -194,25 +179,11 @@ export default function POSInterface() {
     );
   };
 
-  // Function to get filtered employees for a specific item
-  const getFilteredEmployeesForItem = (itemId: string): Employee[] => {
-    const item = items.find((i) => i.id === itemId);
-    if (!item) return employees;
-
-    // Get allowed role names for this category
-    const allowedRoleNames = item.category.categoryRoles.map(
-      (cr) => cr.role.name
-    );
-
-    // If no roles are specified for this category, return all employees
-    if (allowedRoleNames.length === 0) {
-      return employees;
-    }
-
-    // Filter employees who have at least one of the allowed roles
-    return employees.filter((emp) =>
-      emp.employeeRoles.some((er) => allowedRoleNames.includes(er.role.name))
-    );
+  // Function to get employees assigned to a specific item
+  const getAssignedEmployeesForItem = (
+    itemId: string
+  ): EmployeeWithCommission[] => {
+    return itemEmployees[itemId] || [];
   };
 
   const clearCart = () => {
@@ -452,9 +423,6 @@ export default function POSInterface() {
                           ? "Service"
                           : `Stock: ${formatNumber(item.stock)}`}
                       </span>
-                      <span className="text-xs text-gray-600 font-medium">
-                        {item.category.name}
-                      </span>
                     </div>
                   </div>
                 );
@@ -530,15 +498,10 @@ export default function POSInterface() {
                           }
                           className="input-modern text-xs"
                         >
-                          {getFilteredEmployeesForItem(cartItem.id).map(
+                          {getAssignedEmployeesForItem(cartItem.id).map(
                             (emp) => (
                               <option key={emp.id} value={emp.id}>
-                                {emp.name}
-                                {emp.employeeRoles.length > 0
-                                  ? ` (${emp.employeeRoles
-                                      .map((er) => er.role.name)
-                                      .join(", ")})`
-                                  : ""}
+                                {emp.name} ({emp.commissionRate}% commission)
                               </option>
                             )
                           )}

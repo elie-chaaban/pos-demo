@@ -13,11 +13,7 @@ async function generateItemSalesReport(startDate: Date, endDate: Date) {
     include: {
       items: {
         include: {
-          item: {
-            include: {
-              category: true,
-            },
-          },
+          item: {},
         },
       },
     },
@@ -32,7 +28,6 @@ async function generateItemSalesReport(startDate: Date, endDate: Date) {
         itemMap.set(itemId, {
           id: itemId,
           name: saleItem.item.name,
-          category: saleItem.item.category.name,
           quantitySold: 0,
           revenue: 0,
           averagePrice: 0,
@@ -181,75 +176,6 @@ async function generateExpensesReport(startDate: Date, endDate: Date) {
   };
 }
 
-// Helper function to generate category sales report
-async function generateCategorySalesReport(startDate: Date, endDate: Date) {
-  const sales = await prisma.sale.findMany({
-    where: {
-      date: {
-        gte: startDate,
-        lte: endDate,
-      },
-    },
-    include: {
-      items: {
-        include: {
-          item: {
-            include: {
-              category: true,
-            },
-          },
-        },
-      },
-    },
-  });
-
-  const categoryMap = new Map();
-  let totalSales = 0;
-
-  sales.forEach((sale) => {
-    sale.items.forEach((saleItem) => {
-      const categoryId = saleItem.item.category.id;
-      if (!categoryMap.has(categoryId)) {
-        categoryMap.set(categoryId, {
-          id: categoryId,
-          name: saleItem.item.category.name,
-          totalSales: 0,
-          itemCount: 0,
-          averagePrice: 0,
-          commissionRate: saleItem.item.category.commissionRate,
-          marketShare: 0,
-        });
-      }
-      const category = categoryMap.get(categoryId);
-      category.totalSales += saleItem.total;
-      category.itemCount += saleItem.quantity;
-      totalSales += saleItem.total;
-    });
-  });
-
-  // Calculate averages and market share
-  categoryMap.forEach((category) => {
-    category.averagePrice =
-      category.itemCount > 0 ? category.totalSales / category.itemCount : 0;
-    category.marketShare =
-      totalSales > 0 ? (category.totalSales / totalSales) * 100 : 0;
-  });
-
-  return {
-    categories: Array.from(categoryMap.values()).sort(
-      (a, b) => b.totalSales - a.totalSales
-    ),
-    summary: {
-      totalCategories: categoryMap.size,
-      totalSales: totalSales,
-      topCategory:
-        Array.from(categoryMap.values()).sort(
-          (a, b) => b.totalSales - a.totalSales
-        )[0]?.name || "N/A",
-    },
-  };
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -310,9 +236,7 @@ export async function GET(request: NextRequest) {
           items: {
             include: {
               item: {
-                include: {
-                  category: true,
-                },
+                include: {},
               },
               employee: true,
             },
@@ -328,7 +252,6 @@ export async function GET(request: NextRequest) {
         employeeEarnings: 0,
         salonOwnerEarnings: 0,
         byEmployee: {} as any,
-        byCategory: {} as any,
         // Advanced analytics
         hourlyTrends: {} as any,
         customerAnalytics: {
@@ -392,17 +315,12 @@ export async function GET(request: NextRequest) {
 
         sale.items.forEach((saleItem) => {
           const itemTotal = saleItem.total;
-          const category = saleItem.item.category;
           const employee = saleItem.employee;
           totalItemsSold += saleItem.quantity;
 
-          // Use stored commission amounts (fallback to calculated if not stored)
-          const employeeCommission =
-            (saleItem as any).commissionAmount ??
-            (itemTotal * category.commissionRate) / 100;
-          const salonOwnerShare =
-            (saleItem as any).salonOwnerAmount ??
-            (itemTotal * category.salonOwnerRate) / 100;
+          // Use stored commission amounts from employee-specific rates
+          const employeeCommission = saleItem.commissionAmount ?? 0;
+          const salonOwnerShare = saleItem.salonOwnerAmount ?? 0;
 
           revenueData.employeeEarnings += employeeCommission;
           revenueData.salonOwnerEarnings += salonOwnerShare;
@@ -419,21 +337,6 @@ export async function GET(request: NextRequest) {
           revenueData.byEmployee[employee.id].totalSales += itemTotal;
           revenueData.byEmployee[employee.id].commission += employeeCommission;
           revenueData.byEmployee[employee.id].itemsSold += saleItem.quantity;
-
-          // Track by category
-          if (!revenueData.byCategory[category.id]) {
-            revenueData.byCategory[category.id] = {
-              name: category.name,
-              totalSales: 0,
-              employeeCommission: 0,
-              salonOwnerShare: 0,
-            };
-          }
-          revenueData.byCategory[category.id].totalSales += itemTotal;
-          revenueData.byCategory[category.id].employeeCommission +=
-            employeeCommission;
-          revenueData.byCategory[category.id].salonOwnerShare +=
-            salonOwnerShare;
         });
       });
 
@@ -528,11 +431,7 @@ export async function GET(request: NextRequest) {
           },
         },
         include: {
-          item: {
-            include: {
-              category: true,
-            },
-          },
+          item: {},
         },
       });
 
@@ -565,7 +464,6 @@ export async function GET(request: NextRequest) {
         if (!inventoryData.byItem[record.item.id]) {
           inventoryData.byItem[record.item.id] = {
             name: record.item.name,
-            category: record.item.category.name,
             totalCost: 0,
             totalQuantity: 0,
           };
@@ -605,14 +503,6 @@ export async function GET(request: NextRequest) {
         endDate
       );
       return NextResponse.json(customerSalesData);
-    }
-
-    if (type === "category-sales") {
-      const categorySalesData = await generateCategorySalesReport(
-        startDate,
-        endDate
-      );
-      return NextResponse.json(categorySalesData);
     }
 
     if (type === "expenses") {

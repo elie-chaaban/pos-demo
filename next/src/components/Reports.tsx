@@ -22,7 +22,6 @@ import { toast } from "sonner";
 interface ItemSalesData extends Record<string, unknown> {
   id: string;
   name: string;
-  category: string;
   quantitySold: number;
   revenue: number;
   averagePrice: number;
@@ -39,15 +38,6 @@ interface CustomerSalesData extends Record<string, unknown> {
   lastPurchase: string;
 }
 
-interface CategorySalesData extends Record<string, unknown> {
-  id: string;
-  name: string;
-  totalSales: number;
-  itemCount: number;
-  averagePrice: number;
-  commissionRate: number;
-  marketShare: number;
-}
 
 interface ExpenseData extends Record<string, unknown> {
   id: string;
@@ -76,15 +66,6 @@ interface ReportData {
         totalSales: number;
         commission: number;
         itemsSold: number;
-      }
-    >;
-    byCategory: Record<
-      string,
-      {
-        name: string;
-        totalSales: number;
-        employeeCommission: number;
-        salonOwnerShare: number;
       }
     >;
     // Advanced analytics
@@ -176,9 +157,6 @@ export default function Reports() {
   const [customerSalesData, setCustomerSalesData] = useState<{
     customers: CustomerSalesData[];
   } | null>(null);
-  const [categorySalesData, setCategorySalesData] = useState<{
-    categories: CategorySalesData[];
-  } | null>(null);
   const [expensesData, setExpensesData] = useState<{
     expenses: ExpenseData[];
   } | null>(null);
@@ -236,30 +214,6 @@ export default function Reports() {
     customDateRange.endDate,
   ]);
 
-  const fetchCategorySalesData = useCallback(async () => {
-    try {
-      let url = `/api/reports?period=${selectedPeriod}&type=category-sales`;
-
-      if (
-        useCustomRange &&
-        customDateRange.startDate &&
-        customDateRange.endDate
-      ) {
-        url += `&startDate=${customDateRange.startDate}&endDate=${customDateRange.endDate}`;
-      }
-
-      const response = await fetch(url);
-      const data = await response.json();
-      setCategorySalesData(data);
-    } catch (error) {
-      console.error("Error fetching category sales data:", error);
-    }
-  }, [
-    selectedPeriod,
-    useCustomRange,
-    customDateRange.startDate,
-    customDateRange.endDate,
-  ]);
 
   const fetchExpensesData = useCallback(async () => {
     try {
@@ -307,7 +261,6 @@ export default function Reports() {
       await Promise.all([
         fetchItemSalesData(),
         fetchCustomerSalesData(),
-        fetchCategorySalesData(),
         fetchExpensesData(),
       ]);
     } catch (error) {
@@ -323,7 +276,6 @@ export default function Reports() {
     customDateRange.endDate,
     fetchItemSalesData,
     fetchCustomerSalesData,
-    fetchCategorySalesData,
     fetchExpensesData,
   ]);
 
@@ -463,7 +415,6 @@ export default function Reports() {
                 { id: "overview", name: "Overview", icon: BarChart3 },
                 { id: "item-sales", name: "Item Sales", icon: ShoppingCart },
                 { id: "customer-sales", name: "Customer Sales", icon: User },
-                { id: "category-sales", name: "Category Sales", icon: Tag },
                 { id: "expenses", name: "Expenses", icon: CreditCard },
                 {
                   id: "employee-performance",
@@ -653,89 +604,6 @@ export default function Reports() {
                   </div>
                 )}
 
-              {/* Modern Category Performance Section */}
-              {reportData.revenue &&
-                Object.keys(reportData.revenue.byCategory).length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                    <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
-                        <Package className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900">
-                          Category Performance
-                        </h3>
-                        <p className="text-gray-600">
-                          Revenue and commission breakdown by service/product
-                          category
-                        </p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {Object.values(reportData.revenue.byCategory).map(
-                        (category, index) => (
-                          <div
-                            key={index}
-                            className="modern-card p-6 hover-lift"
-                          >
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
-                                <span className="text-white font-bold text-lg">
-                                  {category.name.charAt(0).toUpperCase()}
-                                </span>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-2xl font-bold text-purple-600">
-                                  {formatCurrency(category.totalSales)}
-                                </div>
-                                <div className="text-sm text-gray-500">
-                                  Total Sales
-                                </div>
-                              </div>
-                            </div>
-
-                            <h4 className="text-xl font-bold text-gray-900 mb-4">
-                              {category.name}
-                            </h4>
-
-                            <div className="space-y-3">
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-600 font-medium">
-                                  Employee Commission:
-                                </span>
-                                <span className="font-bold text-green-600">
-                                  {formatCurrency(category.employeeCommission)}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-600 font-medium">
-                                  Salon Owner Share:
-                                </span>
-                                <span className="font-bold text-blue-600">
-                                  {formatCurrency(category.salonOwnerShare)}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-gray-600 font-medium">
-                                  Commission Rate:
-                                </span>
-                                <span className="font-bold text-indigo-600">
-                                  {category.totalSales > 0
-                                    ? formatPercentage(
-                                        (category.employeeCommission /
-                                          category.totalSales) *
-                                          100
-                                      )
-                                    : "0%"}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
 
               {/* Advanced Analytics Section */}
               {reportData.revenue && (
@@ -1386,9 +1254,6 @@ export default function Reports() {
                             Item
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Category
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Quantity Sold
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1416,11 +1281,6 @@ export default function Reports() {
                                 <div className="text-sm font-medium text-gray-900">
                                   {typedItem.name}
                                 </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                  {typedItem.category}
-                                </span>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {formatNumber(typedItem.quantitySold)}
@@ -1605,139 +1465,6 @@ export default function Reports() {
             </div>
           )}
 
-          {/* Category Sales Tab */}
-          {activeTab === "category-sales" && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
-                      <Tag className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900">
-                        Category Sales Report
-                      </h3>
-                      <p className="text-gray-600">
-                        Performance analysis by product/service categories
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search categories..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      />
-                    </div>
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    >
-                      <option value="totalSales">Total Sales</option>
-                      <option value="itemCount">Item Count</option>
-                      <option value="name">Name</option>
-                    </select>
-                    <button
-                      onClick={() =>
-                        setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-                      }
-                      className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 cursor-pointer"
-                    >
-                      {sortOrder === "asc" ? "↑" : "↓"}
-                    </button>
-                    <button
-                      onClick={() =>
-                        exportToCSV(
-                          categorySalesData?.categories || [],
-                          `category-sales-${selectedPeriod}`
-                        )
-                      }
-                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span>Export</span>
-                    </button>
-                  </div>
-                </div>
-
-                {categorySalesData?.categories ? (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Category
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Total Sales
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Items Sold
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Avg Price
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Commission Rate
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Market Share
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {filterAndSortData(
-                          categorySalesData.categories,
-                          searchTerm,
-                          sortBy,
-                          sortOrder
-                        ).map((category, index: number) => {
-                          const typedCategory = category as CategorySalesData;
-                          return (
-                            <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {typedCategory.name}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                                {formatCurrency(typedCategory.totalSales)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {formatNumber(typedCategory.itemCount)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {formatCurrency(typedCategory.averagePrice)}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {formatNumber(typedCategory.commissionRate)}%
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {formatNumber(typedCategory.marketShare)}%
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Tag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-500">
-                      No category sales data available for the selected period.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Expenses Tab */}
           {activeTab === "expenses" && (

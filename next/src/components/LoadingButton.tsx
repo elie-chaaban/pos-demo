@@ -2,16 +2,7 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-
-interface LoadingButtonProps {
-  onClick: () => Promise<void> | void;
-  children?: React.ReactNode;
-  variant?: "primary" | "secondary" | "danger" | "success";
-  size?: "sm" | "md" | "lg";
-  disabled?: boolean;
-  className?: string;
-  icon?: React.ReactNode;
-}
+import { LoadingButtonProps } from "../types";
 
 export default function LoadingButton({
   onClick,

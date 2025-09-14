@@ -3,18 +3,12 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const employee = await prisma.employee.findUnique({
-      where: { id: params.id },
-      include: {
-        employeeRoles: {
-          include: {
-            role: true,
-          },
-        },
-      },
+      where: { id },
     });
 
     if (!employee) {
@@ -36,63 +30,27 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
-    const { name, email, phone, roleIds } = body;
+    const { name, email, phone } = body;
 
-    if (
-      !name ||
-      !email ||
-      !phone ||
-      !roleIds ||
-      !Array.isArray(roleIds) ||
-      roleIds.length === 0
-    ) {
+    if (!name || !email || !phone) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
       );
     }
 
-    const employee = await prisma.$transaction(async (tx) => {
-      // Update employee basic info
-      const updatedEmployee = await tx.employee.update({
-        where: { id: params.id },
-        data: {
-          name,
-          email,
-          phone,
-        },
-      });
-
-      // Delete existing employee roles
-      await tx.employeeRole.deleteMany({
-        where: { employeeId: params.id },
-      });
-
-      // Create new employee roles
-      if (roleIds.length > 0) {
-        await tx.employeeRole.createMany({
-          data: roleIds.map((roleId: string) => ({
-            employeeId: params.id,
-            roleId,
-          })),
-        });
-      }
-
-      // Return updated employee with roles
-      return await tx.employee.findUnique({
-        where: { id: params.id },
-        include: {
-          employeeRoles: {
-            include: {
-              role: true,
-            },
-          },
-        },
-      });
+    const employee = await prisma.employee.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        phone,
+      },
     });
 
     return NextResponse.json(employee);
@@ -107,11 +65,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await prisma.employee.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Employee deleted successfully" });

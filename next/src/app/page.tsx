@@ -11,7 +11,6 @@ import {
   Tags,
   BarChart3,
   Settings2,
-  Shield,
   Menu,
   X,
   LogOut,
@@ -24,8 +23,6 @@ import ItemManagement from "@/components/ItemManagement";
 import InventoryManagement from "@/components/InventoryManagement";
 import ExpenseManagement from "@/components/ExpenseManagement";
 import ExpenseCategoryManagement from "@/components/ExpenseCategoryManagement";
-import CategoryManagement from "@/components/CategoryManagement";
-import UserRoleManagement from "@/components/UserRoleManagement";
 import Reports from "@/components/Reports";
 import Settings from "@/components/Settings";
 import AuthWrapper from "@/components/AuthWrapper";
@@ -39,8 +36,6 @@ type Section =
   | "inventory"
   | "expenses"
   | "expense-categories"
-  | "categories"
-  | "user-roles"
   | "reports"
   | "settings";
 
@@ -52,8 +47,6 @@ const navigation = [
   { id: "inventory", name: "Inventory", icon: Warehouse },
   { id: "expenses", name: "Expenses", icon: Receipt },
   { id: "expense-categories", name: "Expense Categories", icon: Tags },
-  { id: "categories", name: "Item Categories", icon: Tags },
-  { id: "user-roles", name: "User Roles", icon: Shield },
   { id: "reports", name: "Reports", icon: BarChart3 },
   { id: "settings", name: "Settings", icon: Settings2 },
 ];
@@ -79,10 +72,6 @@ export default function Home() {
         return <ExpenseManagement />;
       case "expense-categories":
         return <ExpenseCategoryManagement />;
-      case "categories":
-        return <CategoryManagement />;
-      case "user-roles":
-        return <UserRoleManagement />;
       case "reports":
         return <Reports />;
       case "settings":
@@ -326,10 +315,6 @@ export default function Home() {
                           "Record and manage business expenses"}
                         {activeSection === "expense-categories" &&
                           "Manage expense categories for better organization"}
-                        {activeSection === "categories" &&
-                          "Organize items into categories"}
-                        {activeSection === "user-roles" &&
-                          "Manage employee roles and permissions"}
                         {activeSection === "reports" &&
                           "View business analytics and insights"}
                         {activeSection === "settings" &&

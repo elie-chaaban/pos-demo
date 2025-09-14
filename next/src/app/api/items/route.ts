@@ -8,17 +8,6 @@ export async function GET(request: NextRequest) {
 
     const items = await prisma.item.findMany({
       where: forInventory ? ({ isService: false } as any) : undefined,
-      include: {
-        category: {
-          include: {
-            categoryRoles: {
-              include: {
-                role: true,
-              },
-            },
-          },
-        },
-      },
       orderBy: { name: "asc" },
     });
     return NextResponse.json(items);
@@ -34,9 +23,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, categoryId, price, stock, isService, description } = body;
+    const { name, price, stock, isService, description } = body;
 
-    if (!name || !categoryId || price === undefined) {
+    if (!name || price === undefined) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -46,15 +35,11 @@ export async function POST(request: NextRequest) {
     const item = await prisma.item.create({
       data: {
         name,
-        categoryId,
         price,
         stock: isService ? 0 : stock || 0, // Services don't have stock
         isService: isService || false,
         description: description || "",
       } as any,
-      include: {
-        category: true,
-      },
     });
 
     return NextResponse.json(item, { status: 201 });

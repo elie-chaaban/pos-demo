@@ -11,11 +11,7 @@ export async function GET() {
         },
       },
       include: {
-        item: {
-          include: {
-            category: true,
-          },
-        },
+        item: true,
         sale: {
           include: {
             customer: true,
@@ -87,11 +83,7 @@ export async function POST(request: NextRequest) {
           cogsTotal: type === "Usage" ? totalCost : 0,
         },
         include: {
-          item: {
-            include: {
-              category: true,
-            },
-          },
+          item: true,
         },
       });
 

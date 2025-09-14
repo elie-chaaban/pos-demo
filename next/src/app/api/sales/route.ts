@@ -9,11 +9,7 @@ export async function GET() {
         customer: true,
         items: {
           include: {
-            item: {
-              include: {
-                category: true,
-              },
-            },
+            item: true,
             employee: true,
           },
         },
@@ -33,7 +29,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { customerId, items, subtotal, tax, total } = body;
+    const { customerId, items, total } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -65,16 +61,23 @@ export async function POST(request: NextRequest) {
         // Get item details to check if it's a product (needs stock tracking)
         const itemDetails = await tx.item.findUnique({
           where: { id: itemId },
-          include: { category: true },
         });
 
         if (!itemDetails) {
           throw new Error(`Item with id ${itemId} not found`);
         }
 
-        // Calculate commission amounts using current rates
-        const commissionRate = itemDetails.category.commissionRate;
-        const salonOwnerRate = itemDetails.category.salonOwnerRate;
+        // Get employee-specific commission rates for this service
+        const employeeService = await (tx as any).employeeService.findFirst({
+          where: {
+            employeeId,
+            itemId,
+          },
+        });
+
+        // Use employee-specific rates if available, otherwise default to 0
+        const commissionRate = employeeService?.commissionRate ?? 0;
+        const salonOwnerRate = 100 - commissionRate; // Salon owner gets the remainder
         const commissionAmount = (itemTotal * commissionRate) / 100;
         const salonOwnerAmount = (itemTotal * salonOwnerRate) / 100;
 
@@ -94,39 +97,33 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        if (itemDetails) {
-          // Check if this is a product category (needs stock tracking)
-          const isProductCategory = ["cat3", "cat5"].includes(
-            itemDetails.categoryId
-          );
+        if (itemDetails && !itemDetails.isService) {
+          // For non-service items (products), track inventory usage
+          // Calculate cost of goods sold using simple average cost
+          const cogsResult = await calculateCOGS(tx, itemId, quantity);
 
-          if (isProductCategory) {
-            // Calculate cost of goods sold using simple average cost
-            const cogsResult = await calculateCOGS(tx, itemId, quantity);
+          // Create inventory record for usage first
+          await tx.inventoryRecord.create({
+            data: {
+              itemId,
+              saleId: newSale.id,
+              type: "Usage",
+              quantity: -quantity, // Negative for usage
+              unitCost: cogsResult.unitCost,
+              totalCost: cogsResult.totalCost,
+              cogsTotal: cogsResult.totalCost,
+            },
+          });
 
-            // Create inventory record for usage first
-            await tx.inventoryRecord.create({
-              data: {
-                itemId,
-                saleId: newSale.id,
-                type: "Usage",
-                quantity: -quantity, // Negative for usage
-                unitCost: cogsResult.unitCost,
-                totalCost: cogsResult.totalCost,
-                cogsTotal: cogsResult.totalCost,
+          // Update stock (decrement)
+          await tx.item.update({
+            where: { id: itemId },
+            data: {
+              stock: {
+                decrement: quantity,
               },
-            });
-
-            // Update stock (decrement)
-            await tx.item.update({
-              where: { id: itemId },
-              data: {
-                stock: {
-                  decrement: quantity,
-                },
-              },
-            });
-          }
+            },
+          });
         }
       }
 
@@ -137,11 +134,7 @@ export async function POST(request: NextRequest) {
           customer: true,
           items: {
             include: {
-              item: {
-                include: {
-                  category: true,
-                },
-              },
+              item: true,
               employee: true,
             },
           },

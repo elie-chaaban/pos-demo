@@ -10,29 +10,15 @@ import DeleteConfirmationModal from "./DeleteConfirmationModal";
 interface Item {
   id: string;
   name: string;
-  categoryId: string;
   price: number;
   stock: number;
   isService: boolean;
   description?: string;
   averageCost?: number;
-  category: {
-    id: string;
-    name: string;
-  };
-}
-
-interface Category {
-  id: string;
-  name: string;
-  commissionRate: number;
-  salonOwnerRate: number;
-  description: string;
 }
 
 export default function ItemManagement() {
   const [items, setItems] = useState<Item[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
@@ -40,7 +26,6 @@ export default function ItemManagement() {
   const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
   const [formData, setFormData] = useState({
     name: "",
-    categoryId: "",
     price: 0,
     stock: 0,
     isService: false,
@@ -49,28 +34,18 @@ export default function ItemManagement() {
 
   useEffect(() => {
     fetchItems();
-    fetchCategories();
   }, []);
 
   const fetchItems = async () => {
     try {
       const response = await fetch("/api/items");
       const data = await response.json();
-      setItems(data);
+      setItems(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching items:", error);
+      setItems([]);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch("/api/categories");
-      const data = await response.json();
-      setCategories(data);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
     }
   };
 
@@ -93,7 +68,6 @@ export default function ItemManagement() {
         setEditingItem(null);
         setFormData({
           name: "",
-          categoryId: "",
           price: 0,
           stock: 0,
           isService: false,
@@ -118,7 +92,6 @@ export default function ItemManagement() {
     setEditingItem(item);
     setFormData({
       name: item.name,
-      categoryId: item.categoryId,
       price: item.price,
       stock: item.stock,
       isService: item.isService,
@@ -158,7 +131,6 @@ export default function ItemManagement() {
     setEditingItem(null);
     setFormData({
       name: "",
-      categoryId: "",
       price: 0,
       stock: 0,
       isService: false,
@@ -172,7 +144,6 @@ export default function ItemManagement() {
     setEditingItem(null);
     setFormData({
       name: "",
-      categoryId: "",
       price: 0,
       stock: 0,
       isService: false,
@@ -309,9 +280,6 @@ export default function ItemManagement() {
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 {item.name}
               </h3>
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 bg-gradient-to-r from-gray-500 to-gray-600 text-white">
-                {item.category.name}
-              </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -396,27 +364,6 @@ export default function ItemManagement() {
                   className="input-modern"
                   placeholder="Enter item name"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Category
-                </label>
-                <select
-                  required
-                  value={formData.categoryId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, categoryId: e.target.value })
-                  }
-                  className="input-modern"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div>

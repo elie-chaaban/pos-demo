@@ -4,13 +4,6 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const employees = await prisma.employee.findMany({
-      include: {
-        employeeRoles: {
-          include: {
-            role: true,
-          },
-        },
-      },
       orderBy: { name: "asc" },
     });
     return NextResponse.json(employees);
@@ -26,16 +19,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, roleIds } = body;
+    const { name, email, phone } = body;
 
-    if (
-      !name ||
-      !email ||
-      !phone ||
-      !roleIds ||
-      !Array.isArray(roleIds) ||
-      roleIds.length === 0
-    ) {
+    if (!name || !email || !phone) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -47,18 +33,6 @@ export async function POST(request: NextRequest) {
         name,
         email,
         phone,
-        employeeRoles: {
-          create: roleIds.map((roleId: string) => ({
-            roleId,
-          })),
-        },
-      },
-      include: {
-        employeeRoles: {
-          include: {
-            role: true,
-          },
-        },
       },
     });
 

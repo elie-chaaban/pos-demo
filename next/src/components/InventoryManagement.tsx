@@ -19,10 +19,6 @@ interface InventoryRecord {
   item: {
     id: string;
     name: string;
-    category: {
-      id: string;
-      name: string;
-    };
   };
   sale?: {
     id: string;
@@ -35,10 +31,6 @@ interface InventoryRecord {
 interface Item {
   id: string;
   name: string;
-  category: {
-    id: string;
-    name: string;
-  };
   stock: number;
   averageCost: number;
   isService: boolean;
@@ -321,9 +313,6 @@ export default function InventoryManagement() {
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 {record.item.name}
               </h3>
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 bg-gradient-to-r from-gray-500 to-gray-600 text-white">
-                {record.item.category.name}
-              </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -436,7 +425,7 @@ export default function InventoryManagement() {
                   <option value="">Select Item</option>
                   {items.map((item) => (
                     <option key={item.id} value={item.id}>
-                      {item.name} ({item.category.name}) - Stock: {item.stock}
+                      {item.name} - Stock: {item.stock}
                     </option>
                   ))}
                 </select>
