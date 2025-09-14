@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   LogOut,
+  Store,
 } from "lucide-react";
 import POSInterface from "@/components/POSInterface";
 import CustomerManagement from "@/components/CustomerManagement";
@@ -108,8 +109,8 @@ export default function Home() {
                 </button>
 
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                    <ShoppingCart className="w-5 h-5 text-white" />
+                  <div className="w-14 h-14 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+                    <Store className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h1 className="text-xl font-bold text-gray-900">
@@ -178,7 +179,7 @@ export default function Home() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                        <ShoppingCart className="w-6 h-6 text-white" />
+                        <Store className="w-6 h-6 text-white" />
                       </div>
                       <div>
                         <h1 className="text-xl font-bold text-gray-900">
@@ -230,8 +231,8 @@ export default function Home() {
             {/* Logo Section */}
             <div className="p-8 border-b border-gray-100 flex-shrink-0">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg">
-                  <ShoppingCart className="w-8 h-8 text-white" />
+                <div className="w-16 h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-lg">
+                  <Store className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">
@@ -397,7 +398,7 @@ export default function Home() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                        <ShoppingCart className="w-6 h-6 text-white" />
+                        <Store className="w-6 h-6 text-white" />
                       </div>
                       <div>
                         <h1 className="text-xl font-bold text-gray-900">
