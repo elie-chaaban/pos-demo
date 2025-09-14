@@ -212,7 +212,10 @@ export default function ItemManagement() {
                 {formatCurrency(
                   items
                     .filter((item) => !item.isService)
-                    .reduce((sum, item) => sum + item.price * item.stock, 0)
+                    .reduce(
+                      (sum, item) => sum + (item.averageCost || 0) * item.stock,
+                      0
+                    )
                 )}
               </div>
               <div className="text-sm text-gray-500 font-medium">
