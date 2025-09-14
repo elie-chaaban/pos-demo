@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Calculator, Package } from "lucide-react";
+import { Calculator } from "lucide-react";
 
 interface Settings {
   costingMethod?: string;
@@ -63,13 +63,6 @@ export default function Settings() {
     }
   };
 
-  const handleInputChange = (key: keyof Settings, value: string) => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -99,14 +92,14 @@ export default function Settings() {
               Configure your salon management system
             </p>
           </div>
-          <button
+          {/* <button
             onClick={handleSave}
             disabled={saving}
             className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none cursor-pointer"
           >
             <Save className={`w-5 h-5 ${saving ? "animate-pulse" : ""}`} />
             <span>{saving ? "Saving..." : "Save Settings"}</span>
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -156,46 +149,6 @@ export default function Settings() {
       )}
 
       <div className="space-y-8">
-        {/* Modern Inventory Costing Method */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-          <div className="flex items-center mb-6">
-            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center mr-4">
-              <Package className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">
-                Inventory Costing Method
-              </h3>
-              <p className="text-gray-600">
-                Configure how inventory costs are calculated
-              </p>
-            </div>
-          </div>
-          <p className="text-gray-600 mb-4">
-            Choose how to calculate the cost of goods sold when items are used
-            or sold.
-          </p>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Costing Method:
-              </label>
-              <div className="w-full max-w-md border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-600">
-                Average Cost (Simplified for Beauty Lounges)
-              </div>
-            </div>
-
-            <div className="bg-green-50 p-4 rounded-lg">
-              <div className="text-sm text-green-800">
-                <strong>Average Cost:</strong> Automatically calculates the
-                weighted average cost of all inventory purchases. Perfect for
-                beauty lounges - simple, consistent, and easy to understand.
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Average Cost Method */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h3 className="text-xl font-semibold mb-4 flex items-center">
