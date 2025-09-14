@@ -232,7 +232,7 @@ export default function ItemManagement() {
                     .length
                 }
               </div>
-              <div className="text-sm text-gray-500 font-medium">Low Stock</div>
+              <div className="text-sm text-gray-500 font-medium">{`Low Stock (<=5)`}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600">

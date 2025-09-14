@@ -204,32 +204,6 @@ export default function EmployeeManagement() {
                 Total Employees
               </div>
             </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">
-                {formatNumber(
-                  employees.filter((e) =>
-                    e.employeeRoles.some((er) => er.role.name === "Hairdresser")
-                  ).length
-                )}
-              </div>
-              <div className="text-sm text-gray-500 font-medium">
-                Hairdressers
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">
-                {formatNumber(
-                  employees.filter((e) =>
-                    e.employeeRoles.some(
-                      (er) => er.role.name === "Nail Technician"
-                    )
-                  ).length
-                )}
-              </div>
-              <div className="text-sm text-gray-500 font-medium">
-                Nail Techs
-              </div>
-            </div>
           </div>
           <button
             onClick={openModal}
