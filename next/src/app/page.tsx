@@ -160,11 +160,11 @@ export default function Home() {
           {/* Collapsible Sidebar */}
           {sidebarOpen && (
             <div
-              className="fixed inset-0 z-40"
+              className="fixed inset-0 z-40 mobile-overlay"
               onClick={() => setSidebarOpen(false)}
             >
               <div
-                className={`fixed left-0 top-0 h-full w-80 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+                className={`fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
                   sidebarOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
                 onClick={(e) => e.stopPropagation()}
@@ -220,8 +220,8 @@ export default function Home() {
       ) : (
         /* For other sections, show the full dashboard layout */
         <div className="flex h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-          {/* Modern Sidebar */}
-          <div className="w-80 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 shadow-xl hidden lg:block">
+          {/* Modern Sidebar - Hidden on mobile/tablet, visible on desktop */}
+          <div className="w-80 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 shadow-xl hidden xl:block">
             {/* Logo Section */}
             <div className="p-8 border-b border-gray-100">
               <div className="flex items-center space-x-4">
@@ -292,22 +292,22 @@ export default function Home() {
             {/* Modern Header */}
             <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-4 lg:px-8 py-4 lg:py-6 shadow-sm">
               <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-4">
-                    {/* Mobile menu button */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-3 lg:space-x-4">
+                    {/* Mobile/Tablet menu button */}
                     <button
                       onClick={() => setSidebarOpen(!sidebarOpen)}
-                      className="lg:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="xl:hidden p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                     >
-                      <Menu className="w-6 h-6" />
+                      <Menu className="w-5 h-5 lg:w-6 lg:h-6" />
                     </button>
 
-                    <div>
-                      <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 capitalize">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-gray-900 capitalize truncate">
                         {navigation.find((nav) => nav.id === activeSection)
                           ?.name || "Dashboard"}
                       </h2>
-                      <p className="text-gray-600 mt-1 lg:mt-2 font-medium text-sm lg:text-base">
+                      <p className="text-gray-600 mt-1 lg:mt-2 font-medium text-xs sm:text-sm lg:text-base hidden sm:block">
                         {activeSection === "customers" &&
                           "Manage customer information and build relationships"}
                         {activeSection === "employees" &&
@@ -330,8 +330,8 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center space-x-4 lg:space-x-6">
-                  <div className="text-right hidden sm:block">
+                <div className="flex items-center space-x-2 lg:space-x-4 xl:space-x-6 flex-shrink-0">
+                  <div className="text-right hidden lg:block">
                     <div className="text-sm font-semibold text-gray-900">
                       {new Date().toLocaleDateString("en-US", {
                         weekday: "long",
@@ -347,20 +347,20 @@ export default function Home() {
                       })}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center space-x-2 lg:space-x-3">
                     <div className="text-right hidden md:block">
-                      <div className="text-sm font-semibold text-gray-900">
+                      <div className="text-sm font-semibold text-gray-900 truncate max-w-24 lg:max-w-none">
                         {user?.username || "User"}
                       </div>
                     </div>
-                    <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                    <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
                       <span className="text-white font-bold text-xs lg:text-sm">
                         {user?.username?.charAt(0).toUpperCase() || "U"}
                       </span>
                     </div>
                     <button
                       onClick={logout}
-                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors flex-shrink-0"
                       title="Logout"
                     >
                       <LogOut className="w-4 h-4 lg:w-5 lg:h-5" />
@@ -372,20 +372,20 @@ export default function Home() {
 
             {/* Main Content Area */}
             <main className="flex-1 overflow-y-auto bg-gradient-to-br from-slate-50 to-blue-50">
-              <div className="p-4 lg:p-8">
+              <div className="p-3 sm:p-4 lg:p-6 xl:p-8">
                 <div className="animate-in">{renderSection()}</div>
               </div>
             </main>
           </div>
 
-          {/* Mobile Sidebar Overlay */}
+          {/* Mobile/Tablet Sidebar Overlay */}
           {sidebarOpen && (
-            <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="fixed inset-0 z-50 xl:hidden">
               <div
-                className="fixed inset-0 bg-black bg-opacity-50"
+                className="fixed inset-0 mobile-overlay"
                 onClick={() => setSidebarOpen(false)}
               ></div>
-              <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
+              <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl">
                 <div className="p-6 border-b border-gray-100">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">

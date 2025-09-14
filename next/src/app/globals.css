@@ -358,6 +358,82 @@ body {
   .hover-glow:hover {
     box-shadow: var(--shadow-md);
   }
+
+  /* Mobile sidebar improvements */
+  .mobile-sidebar {
+    width: 100vw;
+    max-width: 320px;
+  }
+
+  /* Better touch targets for mobile */
+  .btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improved mobile spacing */
+  .mobile-padding {
+    padding: 1rem;
+  }
+}
+
+/* Tablet responsive design */
+@media (min-width: 769px) and (max-width: 1279px) {
+  .tablet-sidebar {
+    width: 100vw;
+    max-width: 400px;
+  }
+
+  /* Tablet-optimized spacing */
+  .tablet-padding {
+    padding: 1.5rem;
+  }
+}
+
+/* Enhanced mobile sidebar animations */
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.slide-in-left {
+  animation: slide-in-left 0.3s ease-out;
+}
+
+.slide-out-left {
+  animation: slide-out-left 0.3s ease-in;
+}
+
+/* Mobile overlay improvements */
+.mobile-overlay {
+  backdrop-filter: blur(4px);
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Responsive text utilities */
+@media (max-width: 640px) {
+  .text-responsive-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .text-responsive-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
 }
 
 /* Tablet and desktop optimizations */
@@ -368,5 +444,12 @@ body {
 
   .input-modern {
     @apply px-4 py-3;
+  }
+}
+
+/* Large desktop optimizations */
+@media (min-width: 1280px) {
+  .desktop-sidebar {
+    width: 20rem;
   }
 }
