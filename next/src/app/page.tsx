@@ -108,7 +108,7 @@ export default function Home() {
                 </button>
 
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+                  <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
                     <ShoppingCart className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -169,15 +169,15 @@ export default function Home() {
               onClick={() => setSidebarOpen(false)}
             >
               <div
-                className={`fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+                className={`fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
                   sidebarOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="p-6 border-b border-gray-100">
+                <div className="p-6 border-b border-gray-100 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
                         <ShoppingCart className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -195,7 +195,7 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-                <nav className="p-6 space-y-3">
+                <nav className="flex-1 overflow-y-auto p-6 space-y-1">
                   {navigation.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeSection === item.id;
@@ -226,12 +226,12 @@ export default function Home() {
         /* For other sections, show the full dashboard layout */
         <div className="flex h-screen bg-gradient-to-br from-slate-50 to-blue-50">
           {/* Modern Sidebar - Hidden on mobile/tablet, visible on desktop */}
-          <div className="w-80 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 shadow-xl hidden xl:block">
+          <div className="w-80 bg-white/80 backdrop-blur-xl border-r border-gray-200/50 shadow-xl hidden xl:flex flex-col h-full">
             {/* Logo Section */}
-            <div className="p-8 border-b border-gray-100">
+            <div className="p-8 border-b border-gray-100 flex-shrink-0">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center shadow-lg">
-                  <ShoppingCart className="w-7 h-7 text-white" />
+                <div className="w-16 h-16 gradient-primary rounded-2xl flex items-center justify-center shadow-lg">
+                  <ShoppingCart className="w-8 h-8 text-white" />
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900">
@@ -244,8 +244,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Navigation */}
-            <nav className="p-6 space-y-3">
+            {/* Navigation - Scrollable */}
+            <nav className="flex-1 overflow-y-auto p-6 space-y-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeSection === item.id;
@@ -285,7 +285,7 @@ export default function Home() {
             </nav>
 
             {/* Sidebar Footer */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-100 bg-white/50 backdrop-blur-sm">
+            <div className="p-6 border-t border-gray-100 bg-white/50 backdrop-blur-sm flex-shrink-0">
               <div className="text-center">
                 <p className="text-xs text-gray-500">Enchante by Remy Daher</p>
               </div>
@@ -392,11 +392,11 @@ export default function Home() {
                 className="fixed inset-0 mobile-overlay"
                 onClick={() => setSidebarOpen(false)}
               ></div>
-              <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl">
-                <div className="p-6 border-b border-gray-100">
+              <div className="fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-white shadow-xl flex flex-col">
+                <div className="p-6 border-b border-gray-100 flex-shrink-0">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+                      <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
                         <ShoppingCart className="w-6 h-6 text-white" />
                       </div>
                       <div>
@@ -414,7 +414,7 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-                <nav className="p-6 space-y-3">
+                <nav className="flex-1 overflow-y-auto p-6 space-y-1">
                   {navigation.map((item) => {
                     const Icon = item.icon;
                     const isActive = activeSection === item.id;

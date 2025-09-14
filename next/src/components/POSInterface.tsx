@@ -134,6 +134,12 @@ export default function POSInterface() {
       const filteredEmployees = getFilteredEmployeesForItem(itemId);
       const defaultEmployee = filteredEmployees[0] || employees[0];
 
+      // Check if we have a valid employee
+      if (!defaultEmployee) {
+        toast.error("No employee available. Please add an employee first.");
+        return;
+      }
+
       setCart([
         ...cart,
         {
@@ -257,6 +263,15 @@ export default function POSInterface() {
   const checkout = async () => {
     if (cart.length === 0) {
       toast.error("Cart is empty!");
+      return;
+    }
+
+    // Check if all cart items have valid employee assignments
+    const itemsWithoutEmployee = cart.filter((item) => !item.employeeId);
+    if (itemsWithoutEmployee.length > 0) {
+      toast.error(
+        "Some items don't have an employee assigned. Please assign employees to all items."
+      );
       return;
     }
 
