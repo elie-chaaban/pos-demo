@@ -64,7 +64,7 @@ export async function PUT(
       );
     }
 
-    const totalCost = quantity * unitCost;
+    let totalCost = quantity * unitCost;
 
     // Update inventory record in a transaction
     const result = await prisma.$transaction(async (tx) => {

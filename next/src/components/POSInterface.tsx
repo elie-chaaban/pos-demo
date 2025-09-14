@@ -92,11 +92,16 @@ export default function POSInterface() {
         customersRes.json(),
       ]);
 
-      setItems(itemsData);
-      setEmployees(employeesData);
-      setCustomers(customersData);
+      // Ensure we always set arrays, even if API returns errors
+      setItems(Array.isArray(itemsData) ? itemsData : []);
+      setEmployees(Array.isArray(employeesData) ? employeesData : []);
+      setCustomers(Array.isArray(customersData) ? customersData : []);
     } catch (error) {
       console.error("Error fetching data:", error);
+      // Set empty arrays on error to prevent filter issues
+      setItems([]);
+      setEmployees([]);
+      setCustomers([]);
     } finally {
       setLoading(false);
     }

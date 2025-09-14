@@ -12,8 +12,7 @@
     "db:generate": "npx prisma generate",
     "db:push": "npx prisma db push",
     "db:migrate": "npx prisma migrate dev",
-    "db:studio": "npx prisma studio",
-    "migrate:mysql": "node migrate-to-mysql.js"
+    "db:studio": "npx prisma studio"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -30,8 +29,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "sonner": "^2.0.7",
-    "mysql2": "^3.11.5",
-    "dotenv": "^16.4.5"
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -39,6 +37,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sqlite3": "^3.1.11",
     "eslint": "^9",
     "eslint-config-next": "15.5.3",
     "tailwindcss": "^4",

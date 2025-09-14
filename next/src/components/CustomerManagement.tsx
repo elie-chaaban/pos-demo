@@ -41,9 +41,17 @@ export default function CustomerManagement() {
     try {
       const response = await fetch("/api/customers");
       const data = await response.json();
-      setCustomers(data);
+
+      // Ensure we always set an array, even if there's an error
+      if (Array.isArray(data)) {
+        setCustomers(data);
+      } else {
+        console.error("API returned non-array data:", data);
+        setCustomers([]);
+      }
     } catch (error) {
       console.error("Error fetching customers:", error);
+      setCustomers([]);
     } finally {
       setLoading(false);
     }
@@ -177,7 +185,7 @@ export default function CustomerManagement() {
           <div className="flex items-center space-x-8">
             <div className="text-center">
               <div className="text-3xl font-bold text-indigo-600">
-                {formatNumber(customers.length)}
+                {formatNumber(Array.isArray(customers) ? customers.length : 0)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Customers
@@ -185,7 +193,11 @@ export default function CustomerManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                {formatNumber(customers.filter((c) => c.email).length)}
+                {formatNumber(
+                  Array.isArray(customers)
+                    ? customers.filter((c) => c.email).length
+                    : 0
+                )}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 With Email
