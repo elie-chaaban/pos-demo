@@ -21,13 +21,7 @@ async function clearData() {
       `   ✅ Deleted ${deletedInventoryRecords.count} inventory records`
     );
 
-    console.log("4. Clearing Inventory Batches...");
-    const deletedInventoryBatches = await prisma.inventoryBatch.deleteMany({});
-    console.log(
-      `   ✅ Deleted ${deletedInventoryBatches.count} inventory batches`
-    );
-
-    console.log("5. Clearing Items...");
+    console.log("4. Clearing Items...");
     const deletedItems = await prisma.item.deleteMany({});
     console.log(`   ✅ Deleted ${deletedItems.count} items`);
 
@@ -36,7 +30,6 @@ async function clearData() {
     console.log(`- Sale Items: ${deletedSaleItems.count}`);
     console.log(`- Sales: ${deletedSales.count}`);
     console.log(`- Inventory Records: ${deletedInventoryRecords.count}`);
-    console.log(`- Inventory Batches: ${deletedInventoryBatches.count}`);
     console.log(`- Items: ${deletedItems.count}`);
   } catch (error) {
     console.error("❌ Error during data cleanup:", error);

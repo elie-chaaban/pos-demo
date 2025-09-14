@@ -22,6 +22,7 @@ import EmployeeManagement from "@/components/EmployeeManagement";
 import ItemManagement from "@/components/ItemManagement";
 import InventoryManagement from "@/components/InventoryManagement";
 import ExpenseManagement from "@/components/ExpenseManagement";
+import ExpenseCategoryManagement from "@/components/ExpenseCategoryManagement";
 import CategoryManagement from "@/components/CategoryManagement";
 import UserRoleManagement from "@/components/UserRoleManagement";
 import Reports from "@/components/Reports";
@@ -36,6 +37,7 @@ type Section =
   | "items"
   | "inventory"
   | "expenses"
+  | "expense-categories"
   | "categories"
   | "user-roles"
   | "reports"
@@ -48,7 +50,8 @@ const navigation = [
   { id: "items", name: "Items", icon: Package },
   { id: "inventory", name: "Inventory", icon: Warehouse },
   { id: "expenses", name: "Expenses", icon: Receipt },
-  { id: "categories", name: "Categories", icon: Tags },
+  { id: "expense-categories", name: "Expense Categories", icon: Tags },
+  { id: "categories", name: "Item Categories", icon: Tags },
   { id: "user-roles", name: "User Roles", icon: Shield },
   { id: "reports", name: "Reports", icon: BarChart3 },
   { id: "settings", name: "Settings", icon: Settings2 },
@@ -73,6 +76,8 @@ export default function Home() {
         return <InventoryManagement />;
       case "expenses":
         return <ExpenseManagement />;
+      case "expense-categories":
+        return <ExpenseCategoryManagement />;
       case "categories":
         return <CategoryManagement />;
       case "user-roles":
@@ -318,6 +323,8 @@ export default function Home() {
                           "Track stock levels and inventory management"}
                         {activeSection === "expenses" &&
                           "Record and manage business expenses"}
+                        {activeSection === "expense-categories" &&
+                          "Manage expense categories for better organization"}
                         {activeSection === "categories" &&
                           "Organize items into categories"}
                         {activeSection === "user-roles" &&

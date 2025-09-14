@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Users } from "lucide-react";
 import { formatNumber } from "../lib/utils";
 import { toast } from "sonner";
+import LoadingButton from "./LoadingButton";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 interface UserRole {
   id: string;
@@ -30,6 +32,8 @@ export default function UserRoleManagement() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingRole, setEditingRole] = useState<UserRole | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<UserRole | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -51,9 +55,7 @@ export default function UserRoleManagement() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     try {
       const url = editingRole
         ? `/api/user-roles/${editingRole.id}`
@@ -76,6 +78,11 @@ export default function UserRoleManagement() {
           name: "",
           description: "",
         });
+        toast.success(
+          editingRole
+            ? "User role updated successfully!"
+            : "User role created successfully!"
+        );
       } else {
         const error = await response.json();
         toast.error(`Error: ${error.error}`);
@@ -95,27 +102,23 @@ export default function UserRoleManagement() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    toast("Are you sure you want to delete this user role?", {
-      action: {
-        label: "Delete",
-        onClick: () => performDelete(id),
-      },
-      cancel: {
-        label: "Cancel",
-        onClick: () => {},
-      },
-    });
+  const handleDelete = (role: UserRole) => {
+    setRoleToDelete(role);
+    setShowDeleteModal(true);
   };
 
-  const performDelete = async (id: string) => {
+  const performDelete = async () => {
+    if (!roleToDelete) return;
+
     try {
-      const response = await fetch(`/api/user-roles/${id}`, {
+      const response = await fetch(`/api/user-roles/${roleToDelete.id}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
         await fetchUserRoles();
+        toast.success("User role deleted successfully!");
+        setRoleToDelete(null);
       } else {
         const error = await response.json();
         toast.error(`Error: ${error.error}`);
@@ -201,13 +204,15 @@ export default function UserRoleManagement() {
               </div>
             </div>
           </div>
-          <button
+          <LoadingButton
             onClick={openModal}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
+            variant="primary"
+            size="lg"
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            icon={<Plus className="w-5 h-5" />}
           >
-            <Plus className="w-5 h-5" />
-            <span>Add Role</span>
-          </button>
+            Add Role
+          </LoadingButton>
         </div>
       </div>
 
@@ -238,18 +243,20 @@ export default function UserRoleManagement() {
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex space-x-2">
-                  <button
+                  <LoadingButton
                     onClick={() => handleEdit(role)}
-                    className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(role.id)}
-                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    variant="secondary"
+                    size="sm"
+                    className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                    icon={<Edit className="w-4 h-4" />}
+                  />
+                  <LoadingButton
+                    onClick={() => handleDelete(role)}
+                    variant="danger"
+                    size="sm"
+                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    icon={<Trash2 className="w-4 h-4" />}
+                  />
                 </div>
               </div>
 
@@ -345,7 +352,7 @@ export default function UserRoleManagement() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Role Name
@@ -379,12 +386,14 @@ export default function UserRoleManagement() {
               </div>
 
               <div className="flex space-x-4 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                <LoadingButton
+                  onClick={handleSubmit}
+                  variant="primary"
+                  size="lg"
+                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl"
                 >
                   {editingRole ? "Update Role" : "Add Role"}
-                </button>
+                </LoadingButton>
                 <button
                   type="button"
                   onClick={closeModal}
@@ -393,10 +402,23 @@ export default function UserRoleManagement() {
                   Cancel
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setRoleToDelete(null);
+        }}
+        onConfirm={performDelete}
+        title="Delete User Role"
+        message="Are you sure you want to delete this user role? This action will permanently remove the role and all its associated permissions."
+        itemName={roleToDelete?.name}
+      />
     </div>
   );
 }

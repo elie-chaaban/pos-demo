@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { formatNumber } from "../lib/utils";
 import { toast } from "sonner";
+import LoadingButton from "./LoadingButton";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 interface Customer {
   id: string;
@@ -19,6 +21,10 @@ export default function CustomerManagement() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(
+    null
+  );
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -43,9 +49,7 @@ export default function CustomerManagement() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     try {
       const url = editingCustomer
         ? `/api/customers/${editingCustomer.id}`
@@ -71,6 +75,11 @@ export default function CustomerManagement() {
           address: "",
           dateOfBirth: "",
         });
+        toast.success(
+          editingCustomer
+            ? "Customer updated successfully!"
+            : "Customer added successfully!"
+        );
       } else {
         const error = await response.json();
         toast.error(`Error: ${error.error}`);
@@ -93,27 +102,23 @@ export default function CustomerManagement() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    toast("Are you sure you want to delete this customer?", {
-      action: {
-        label: "Delete",
-        onClick: () => performDelete(id),
-      },
-      cancel: {
-        label: "Cancel",
-        onClick: () => {},
-      },
-    });
+  const handleDelete = (customer: Customer) => {
+    setCustomerToDelete(customer);
+    setShowDeleteModal(true);
   };
 
-  const performDelete = async (id: string) => {
+  const performDelete = async () => {
+    if (!customerToDelete) return;
+
     try {
-      const response = await fetch(`/api/customers/${id}`, {
+      const response = await fetch(`/api/customers/${customerToDelete.id}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
         await fetchCustomers();
+        toast.success("Customer deleted successfully!");
+        setCustomerToDelete(null);
       } else {
         const error = await response.json();
         toast.error(`Error: ${error.error}`);
@@ -187,13 +192,15 @@ export default function CustomerManagement() {
               </div>
             </div>
           </div>
-          <button
+          <LoadingButton
             onClick={openModal}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
+            variant="primary"
+            size="lg"
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            icon={<Plus className="w-5 h-5" />}
           >
-            <Plus className="w-5 h-5" />
-            <span>Add Customer</span>
-          </button>
+            Add Customer
+          </LoadingButton>
         </div>
       </div>
 
@@ -208,18 +215,20 @@ export default function CustomerManagement() {
                 </span>
               </div>
               <div className="flex space-x-2">
-                <button
+                <LoadingButton
                   onClick={() => handleEdit(customer)}
-                  className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(customer.id)}
-                  className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                  variant="secondary"
+                  size="sm"
+                  className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                  icon={<Edit className="w-4 h-4" />}
+                />
+                <LoadingButton
+                  onClick={() => handleDelete(customer)}
+                  variant="danger"
+                  size="sm"
+                  className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                  icon={<Trash2 className="w-4 h-4" />}
+                />
               </div>
             </div>
 
@@ -291,7 +300,7 @@ export default function CustomerManagement() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Full Name
@@ -369,12 +378,14 @@ export default function CustomerManagement() {
               </div>
 
               <div className="flex space-x-4 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                <LoadingButton
+                  onClick={handleSubmit}
+                  variant="primary"
+                  size="lg"
+                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl"
                 >
                   {editingCustomer ? "Update Customer" : "Add Customer"}
-                </button>
+                </LoadingButton>
                 <button
                   type="button"
                   onClick={closeModal}
@@ -383,10 +394,23 @@ export default function CustomerManagement() {
                   Cancel
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setCustomerToDelete(null);
+        }}
+        onConfirm={performDelete}
+        title="Delete Customer"
+        message="Are you sure you want to delete this customer? This action will permanently remove the customer and all their associated data."
+        itemName={customerToDelete?.name}
+      />
     </div>
   );
 }

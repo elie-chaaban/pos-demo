@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { calculateCOGS } from "@/lib/costing";
+import { calculateCOGS, updateAverageCost } from "@/lib/costing";
 
 export async function GET() {
   try {
@@ -111,20 +111,18 @@ export async function POST(request: NextRequest) {
         // Add to stock
         newStock += quantity;
 
-        // Update average cost using weighted average
-        const currentValue =
-          (itemForUpdate.averageCost || 0) * itemForUpdate.stock;
-        const newValue = totalCost;
-        const totalQuantity = itemForUpdate.stock + quantity;
-
-        if (totalQuantity > 0) {
-          newAverageCost = (currentValue + newValue) / totalQuantity;
-        }
+        // Update average cost using the simplified function
+        newAverageCost = await updateAverageCost(
+          tx,
+          itemId,
+          quantity,
+          unitCost
+        );
       } else if (type === "Usage") {
         // Subtract from stock
         newStock = Math.max(0, newStock - quantity);
 
-        // Calculate cost of goods sold using the configured costing method
+        // Calculate cost of goods sold using simple average cost
         const cogsResult = await calculateCOGS(tx, itemId, quantity);
 
         // Update the inventory record with calculated COGS
@@ -149,20 +147,6 @@ export async function POST(request: NextRequest) {
           averageCost: newAverageCost,
         },
       });
-
-      // Create inventory batch for tracking
-      if (type === "Purchase" || type === "Return") {
-        await tx.inventoryBatch.create({
-          data: {
-            itemId,
-            quantity,
-            unitCost,
-            type,
-            date: date ? new Date(date) : new Date(),
-            remainingQuantity: quantity,
-          },
-        });
-      }
 
       return inventoryRecord;
     });

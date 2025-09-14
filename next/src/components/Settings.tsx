@@ -181,63 +181,52 @@ export default function Settings() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Costing Method:
               </label>
-              <select
-                value={settings.costingMethod || "LIFO"}
-                onChange={(e) =>
-                  handleInputChange("costingMethod", e.target.value)
-                }
-                className="w-full max-w-md border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="LIFO">LIFO (Last In, First Out)</option>
-                <option value="WeightedAverage">Weighted Average Cost</option>
-              </select>
+              <div className="w-full max-w-md border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 text-gray-600">
+                Average Cost (Simplified for Beauty Lounges)
+              </div>
             </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="text-sm text-blue-800">
-                <strong>LIFO:</strong> Uses the cost of the newest inventory
-                first
-                <br />
-                <strong>Weighted Average:</strong> Uses the average cost of all
-                inventory
+            <div className="bg-green-50 p-4 rounded-lg">
+              <div className="text-sm text-green-800">
+                <strong>Average Cost:</strong> Automatically calculates the
+                weighted average cost of all inventory purchases. Perfect for
+                beauty lounges - simple, consistent, and easy to understand.
               </div>
             </div>
           </div>
         </div>
 
-        {/* Costing Method Examples */}
+        {/* Average Cost Method */}
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <h3 className="text-xl font-semibold mb-4 flex items-center">
             <Calculator className="w-5 h-5 mr-2" />
-            Costing Method Examples
+            Average Cost Method
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-green-800 mb-2">
-                LIFO Example:
-              </h4>
-              <div className="text-sm text-green-700 space-y-2">
-                <p>You buy 100 items at $8 each, then 50 items at $10 each.</p>
-                <p>
-                  When you sell 30 items, the cost is calculated using the
-                  newest batch first:
-                </p>
-                <ul className="list-disc list-inside ml-2">
-                  <li>30 items × $10 = $300 (from second batch)</li>
-                </ul>
-              </div>
-            </div>
+          <div className="bg-blue-50 p-6 rounded-lg">
+            <h4 className="font-semibold text-blue-800 mb-3">
+              How Average Cost Works:
+            </h4>
+            <div className="text-sm text-blue-700 space-y-3">
+              <p>
+                <strong>Simple & Perfect for Beauty Lounges:</strong> The system
+                automatically calculates the average cost of your inventory as
+                you purchase items.
+              </p>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-800 mb-2">
-                Weighted Average Example:
-              </h4>
-              <div className="text-sm text-blue-700 space-y-2">
-                <p>You buy 100 items at $8 each, then 50 items at $10 each.</p>
-                <p>Average cost = (100×$8 + 50×$10) ÷ 150 = $8.67</p>
-                <p>When you sell 30 items: 30 × $8.67 = $260</p>
+              <div className="bg-white p-4 rounded border-l-4 border-blue-500">
+                <p className="font-medium mb-2">Example:</p>
+                <p>• You buy 100 items at $8 each</p>
+                <p>• Then you buy 50 items at $10 each</p>
+                <p>• Average cost = (100×$8 + 50×$10) ÷ 150 = $8.67</p>
+                <p>• When you sell 30 items: 30 × $8.67 = $260</p>
               </div>
+
+              <p>
+                <strong>Benefits:</strong> No complex batch tracking, easy to
+                understand, and provides consistent costing for your beauty
+                lounge operations.
+              </p>
             </div>
           </div>
         </div>

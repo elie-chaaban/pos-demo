@@ -106,7 +106,6 @@ model Item {
   category        Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   saleItems       SaleItem[]
   inventoryRecords InventoryRecord[]
-  inventoryBatches InventoryBatch[]
 
   @@map("items")
 }
@@ -167,20 +166,6 @@ model InventoryRecord {
   @@map("inventory_records")
 }
 
-model InventoryBatch {
-  id                String   @id @default(cuid())
-  itemId            String
-  quantity          Int
-  unitCost          Float
-  type              String   // Purchase, Return, Adjustment
-  date              DateTime @default(now())
-  remainingQuantity Int
-  createdAt         DateTime @default(now())
-
-  item Item @relation(fields: [itemId], references: [id])
-
-  @@map("inventory_batches")
-}
 
 model Expense {
   id            String   @id @default(cuid())

@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Package } from "lucide-react";
 import { formatCurrency, formatNumber } from "../lib/utils";
 import { toast } from "sonner";
+import LoadingButton from "./LoadingButton";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 interface InventoryRecord {
   id: string;
@@ -52,6 +54,10 @@ export default function InventoryManagement() {
   const [editingRecord, setEditingRecord] = useState<InventoryRecord | null>(
     null
   );
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState<InventoryRecord | null>(
+    null
+  );
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
     itemId: "",
@@ -89,9 +95,7 @@ export default function InventoryManagement() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     try {
       const url = editingRecord
         ? `/api/inventory/${editingRecord.id}`
@@ -118,6 +122,11 @@ export default function InventoryManagement() {
           quantity: 0,
           unitCost: 0,
         });
+        toast.success(
+          editingRecord
+            ? "Inventory record updated successfully!"
+            : "Inventory record added successfully!"
+        );
       } else {
         const error = await response.json();
         toast.error(`Error: ${error.error}`);
@@ -140,28 +149,24 @@ export default function InventoryManagement() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    toast("Are you sure you want to delete this inventory record?", {
-      action: {
-        label: "Delete",
-        onClick: () => performDelete(id),
-      },
-      cancel: {
-        label: "Cancel",
-        onClick: () => {},
-      },
-    });
+  const handleDelete = (record: InventoryRecord) => {
+    setRecordToDelete(record);
+    setShowDeleteModal(true);
   };
 
-  const performDelete = async (id: string) => {
+  const performDelete = async () => {
+    if (!recordToDelete) return;
+
     try {
-      const response = await fetch(`/api/inventory/${id}`, {
+      const response = await fetch(`/api/inventory/${recordToDelete.id}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
         await fetchInventoryRecords();
         await fetchItems(); // Refresh items to update stock
+        toast.success("Inventory record deleted successfully!");
+        setRecordToDelete(null);
       } else {
         const error = await response.json();
         toast.error(`Error: ${error.error}`);
@@ -248,13 +253,15 @@ export default function InventoryManagement() {
               <div className="text-sm text-gray-500 font-medium">Purchases</div>
             </div>
           </div>
-          <button
+          <LoadingButton
             onClick={openModal}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
+            variant="primary"
+            size="lg"
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            icon={<Plus className="w-5 h-5" />}
           >
-            <Plus className="w-5 h-5" />
-            <span>Add Stock</span>
-          </button>
+            Add Stock
+          </LoadingButton>
         </div>
       </div>
 
@@ -294,18 +301,20 @@ export default function InventoryManagement() {
                   >
                     {record.type}
                   </span>
-                  <button
+                  <LoadingButton
                     onClick={() => handleEdit(record)}
-                    className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(record.id)}
-                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    variant="secondary"
+                    size="sm"
+                    className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                    icon={<Edit className="w-4 h-4" />}
+                  />
+                  <LoadingButton
+                    onClick={() => handleDelete(record)}
+                    variant="danger"
+                    size="sm"
+                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    icon={<Trash2 className="w-4 h-4" />}
+                  />
                 </div>
               </div>
 
@@ -375,7 +384,7 @@ export default function InventoryManagement() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -489,12 +498,14 @@ export default function InventoryManagement() {
               </div>
 
               <div className="flex space-x-4 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                <LoadingButton
+                  onClick={handleSubmit}
+                  variant="primary"
+                  size="lg"
+                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl"
                 >
                   {editingRecord ? "Update Record" : "Add Record"}
-                </button>
+                </LoadingButton>
                 <button
                   type="button"
                   onClick={closeModal}
@@ -503,10 +514,27 @@ export default function InventoryManagement() {
                   Cancel
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setRecordToDelete(null);
+        }}
+        onConfirm={performDelete}
+        title="Delete Inventory Record"
+        message="Are you sure you want to delete this inventory record? This action will permanently remove the record and may affect stock calculations."
+        itemName={
+          recordToDelete
+            ? `${recordToDelete.item.name} - ${recordToDelete.type}`
+            : undefined
+        }
+      />
     </div>
   );
 }

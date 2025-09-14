@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { formatCurrency, formatNumber } from "../lib/utils";
 import { toast } from "sonner";
+import LoadingButton from "./LoadingButton";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
 
 interface Item {
   id: string;
@@ -34,6 +36,8 @@ export default function ItemManagement() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     categoryId: "",
@@ -70,9 +74,7 @@ export default function ItemManagement() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = async () => {
     try {
       const url = editingItem ? `/api/items/${editingItem.id}` : "/api/items";
       const method = editingItem ? "PUT" : "POST";
@@ -97,6 +99,11 @@ export default function ItemManagement() {
           isService: false,
           description: "",
         });
+        toast.success(
+          editingItem
+            ? "Item updated successfully!"
+            : "Item added successfully!"
+        );
       } else {
         const error = await response.json();
         toast.error(`Error: ${error.error}`);
@@ -120,27 +127,23 @@ export default function ItemManagement() {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    toast("Are you sure you want to delete this item?", {
-      action: {
-        label: "Delete",
-        onClick: () => performDelete(id),
-      },
-      cancel: {
-        label: "Cancel",
-        onClick: () => {},
-      },
-    });
+  const handleDelete = (item: Item) => {
+    setItemToDelete(item);
+    setShowDeleteModal(true);
   };
 
-  const performDelete = async (id: string) => {
+  const performDelete = async () => {
+    if (!itemToDelete) return;
+
     try {
-      const response = await fetch(`/api/items/${id}`, {
+      const response = await fetch(`/api/items/${itemToDelete.id}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
         await fetchItems();
+        toast.success("Item deleted successfully!");
+        setItemToDelete(null);
       } else {
         const error = await response.json();
         toast.error(`Error: ${error.error}`);
@@ -238,13 +241,15 @@ export default function ItemManagement() {
               <div className="text-sm text-gray-500 font-medium">Services</div>
             </div>
           </div>
-          <button
+          <LoadingButton
             onClick={openModal}
-            className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
+            variant="primary"
+            size="lg"
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            icon={<Plus className="w-5 h-5" />}
           >
-            <Plus className="w-5 h-5" />
-            <span>Add Item</span>
-          </button>
+            Add Item
+          </LoadingButton>
         </div>
       </div>
 
@@ -284,18 +289,20 @@ export default function ItemManagement() {
                       Out of Stock
                     </span>
                   )}
-                  <button
+                  <LoadingButton
                     onClick={() => handleEdit(item)}
-                    className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    variant="secondary"
+                    size="sm"
+                    className="p-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50"
+                    icon={<Edit className="w-4 h-4" />}
+                  />
+                  <LoadingButton
+                    onClick={() => handleDelete(item)}
+                    variant="danger"
+                    size="sm"
+                    className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    icon={<Trash2 className="w-4 h-4" />}
+                  />
                 </div>
               </div>
 
@@ -374,7 +381,7 @@ export default function ItemManagement() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Item Name
@@ -493,12 +500,14 @@ export default function ItemManagement() {
               </div>
 
               <div className="flex space-x-4 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                <LoadingButton
+                  onClick={handleSubmit}
+                  variant="primary"
+                  size="lg"
+                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl"
                 >
                   {editingItem ? "Update Item" : "Add Item"}
-                </button>
+                </LoadingButton>
                 <button
                   type="button"
                   onClick={closeModal}
@@ -507,10 +516,23 @@ export default function ItemManagement() {
                   Cancel
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={performDelete}
+        title="Delete Item"
+        message="Are you sure you want to delete this item? This action will permanently remove the item and all its associated data."
+        itemName={itemToDelete?.name}
+      />
     </div>
   );
 }

@@ -101,20 +101,10 @@ export async function POST(request: NextRequest) {
           );
 
           if (isProductCategory) {
-            // Update stock
-            await tx.item.update({
-              where: { id: itemId },
-              data: {
-                stock: {
-                  decrement: quantity,
-                },
-              },
-            });
-
-            // Calculate cost of goods sold using the configured costing method
+            // Calculate cost of goods sold using simple average cost
             const cogsResult = await calculateCOGS(tx, itemId, quantity);
 
-            // Create inventory record for usage
+            // Create inventory record for usage first
             await tx.inventoryRecord.create({
               data: {
                 itemId,
@@ -124,6 +114,16 @@ export async function POST(request: NextRequest) {
                 unitCost: cogsResult.unitCost,
                 totalCost: cogsResult.totalCost,
                 cogsTotal: cogsResult.totalCost,
+              },
+            });
+
+            // Update stock (decrement)
+            await tx.item.update({
+              where: { id: itemId },
+              data: {
+                stock: {
+                  decrement: quantity,
+                },
               },
             });
           }

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatNumber } from "../lib/utils";
 import { toast } from "sonner";
+import LoadingButton from "./LoadingButton";
 
 interface Item {
   id: string;
@@ -64,7 +65,6 @@ export default function POSInterface() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState("");
   const [loading, setLoading] = useState(true);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [showAddCustomer, setShowAddCustomer] = useState(false);
   const [newCustomer, setNewCustomer] = useState({
     name: "",
@@ -260,12 +260,6 @@ export default function POSInterface() {
       return;
     }
 
-    if (isProcessingPayment) {
-      return; // Prevent double-clicking
-    }
-
-    setIsProcessingPayment(true);
-
     const total = calculateTotal();
 
     const saleItems = cart.map((cartItem) => {
@@ -303,8 +297,6 @@ export default function POSInterface() {
     } catch (error) {
       console.error("Error during checkout:", error);
       toast.error("Error during checkout. Please try again.");
-    } finally {
-      setIsProcessingPayment(false);
     }
   };
 
@@ -689,27 +681,16 @@ export default function POSInterface() {
               </div>
 
               {/* Modern Checkout Button */}
-              <button
+              <LoadingButton
                 onClick={checkout}
-                disabled={cart.length === 0 || isProcessingPayment}
-                className={`w-full py-3 px-4 rounded-lg font-bold text-sm transition-all duration-200 flex items-center justify-center space-x-2 ${
-                  cart.length === 0 || isProcessingPayment
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 cursor-pointer"
-                }`}
+                disabled={cart.length === 0}
+                variant="success"
+                size="lg"
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                icon={<CreditCard className="w-4 h-4" />}
               >
-                {isProcessingPayment ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>Processing...</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-4 h-4" />
-                    <span>Process Payment</span>
-                  </>
-                )}
-              </button>
+                Process Payment
+              </LoadingButton>
             </div>
           </div>
         </div>

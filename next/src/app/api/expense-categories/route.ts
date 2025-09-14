@@ -28,6 +28,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if category with same name already exists (case-insensitive)
+    const allCategories = await prisma.expenseCategory.findMany();
+    const existingCategory = allCategories.find(
+      (category) => category.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (existingCategory) {
+      return NextResponse.json(
+        { error: "A category with this name already exists" },
+        { status: 400 }
+      );
+    }
+
     const category = await prisma.expenseCategory.create({
       data: {
         name,
