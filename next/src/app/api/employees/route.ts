@@ -21,18 +21,29 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, email, phone } = body;
 
-    if (!name || !email || !phone) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+    if (!name) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+
+    // Check if email already exists (if provided)
+    if (email) {
+      const existingEmail = await prisma.employee.findUnique({
+        where: { email },
+      });
+
+      if (existingEmail) {
+        return NextResponse.json(
+          { error: "Email already exists" },
+          { status: 409 }
+        );
+      }
     }
 
     const employee = await prisma.employee.create({
       data: {
         name,
-        email,
-        phone,
+        email: email || null,
+        phone: phone || null,
       },
     });
 

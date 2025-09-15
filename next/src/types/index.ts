@@ -27,7 +27,6 @@ export interface EmployeeService {
   item: Item;
 }
 
-
 export interface Item {
   id: string;
   name: string;
@@ -102,8 +101,8 @@ export interface Expense {
 // Form data types
 export interface EmployeeFormData {
   name: string;
-  email: string;
-  phone: string;
+  email?: string;
+  phone?: string;
 }
 
 export interface ServiceFormData {
@@ -118,7 +117,6 @@ export interface CustomerFormData {
   address: string;
   dateOfBirth: string;
 }
-
 
 export interface ItemFormData {
   name: string;

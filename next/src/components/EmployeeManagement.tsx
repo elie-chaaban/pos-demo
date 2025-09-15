@@ -29,8 +29,8 @@ export default function EmployeeManagement() {
   );
   const [formData, setFormData] = useState<EmployeeFormData>({
     name: "",
-    email: "",
-    phone: "",
+    email: undefined,
+    phone: undefined,
   });
   const [serviceFormData, setServiceFormData] = useState<ServiceFormData>({
     itemId: "",
@@ -85,9 +85,7 @@ export default function EmployeeManagement() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const performEmployeeSubmit = async () => {
     try {
       const url = editingEmployee
         ? `/api/employees/${editingEmployee.id}`
@@ -96,8 +94,8 @@ export default function EmployeeManagement() {
 
       const requestData = {
         name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
+        ...(formData.email && { email: formData.email }),
+        ...(formData.phone && { phone: formData.phone }),
       };
 
       const response = await fetch(url, {
@@ -114,8 +112,8 @@ export default function EmployeeManagement() {
         setEditingEmployee(null);
         setFormData({
           name: "",
-          email: "",
-          phone: "",
+          email: undefined,
+          phone: undefined,
         });
       } else {
         const error = await response.json();
@@ -131,8 +129,8 @@ export default function EmployeeManagement() {
     setEditingEmployee(employee);
     setFormData({
       name: employee.name,
-      email: employee.email,
-      phone: employee.phone,
+      email: employee.email || undefined,
+      phone: employee.phone || undefined,
     });
     setShowModal(true);
   };
@@ -169,8 +167,8 @@ export default function EmployeeManagement() {
     setEditingEmployee(null);
     setFormData({
       name: "",
-      email: "",
-      phone: "",
+      email: undefined,
+      phone: undefined,
     });
     setShowModal(true);
   };
@@ -180,8 +178,8 @@ export default function EmployeeManagement() {
     setEditingEmployee(null);
     setFormData({
       name: "",
-      email: "",
-      phone: "",
+      email: undefined,
+      phone: undefined,
     });
   };
 
@@ -491,18 +489,22 @@ export default function EmployeeManagement() {
               </h3>
 
               <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-600 font-medium">
-                    {employee.email}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span className="text-gray-600 font-medium">
-                    {employee.phone}
-                  </span>
-                </div>
+                {employee.email && (
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-600 font-medium">
+                      {employee.email}
+                    </span>
+                  </div>
+                )}
+                {employee.phone && (
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-gray-600 font-medium">
+                      {employee.phone}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           );
@@ -537,7 +539,7 @@ export default function EmployeeManagement() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Full Name
@@ -556,12 +558,12 @@ export default function EmployeeManagement() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address
+                  Email Address{" "}
+                  <span className="text-gray-500 text-sm">(Optional)</span>
                 </label>
                 <input
                   type="email"
-                  required
-                  value={formData.email}
+                  value={formData.email || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
@@ -572,12 +574,12 @@ export default function EmployeeManagement() {
 
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number
+                  Phone Number{" "}
+                  <span className="text-gray-500 text-sm">(Optional)</span>
                 </label>
                 <input
                   type="tel"
-                  required
-                  value={formData.phone}
+                  value={formData.phone || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
@@ -587,12 +589,14 @@ export default function EmployeeManagement() {
               </div>
 
               <div className="flex space-x-4 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+                <LoadingButton
+                  onClick={performEmployeeSubmit}
+                  variant="primary"
+                  size="lg"
+                  className="flex-1"
                 >
                   {editingEmployee ? "Update Employee" : "Add Employee"}
-                </button>
+                </LoadingButton>
                 <button
                   type="button"
                   onClick={closeModal}
@@ -601,7 +605,7 @@ export default function EmployeeManagement() {
                   Cancel
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

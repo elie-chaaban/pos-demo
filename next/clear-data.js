@@ -21,16 +21,57 @@ async function clearData() {
       `   ✅ Deleted ${deletedInventoryRecords.count} inventory records`
     );
 
-    console.log("4. Clearing Items...");
+    console.log("4. Clearing Employee Services...");
+    const deletedEmployeeServices = await prisma.employeeService.deleteMany({});
+    console.log(
+      `   ✅ Deleted ${deletedEmployeeServices.count} employee services`
+    );
+
+    console.log("5. Clearing Expenses...");
+    const deletedExpenses = await prisma.expense.deleteMany({});
+    console.log(`   ✅ Deleted ${deletedExpenses.count} expenses`);
+
+    console.log("6. Clearing Expense Categories...");
+    const deletedExpenseCategories = await prisma.expenseCategory.deleteMany(
+      {}
+    );
+    console.log(
+      `   ✅ Deleted ${deletedExpenseCategories.count} expense categories`
+    );
+
+    console.log("7. Clearing Items...");
     const deletedItems = await prisma.item.deleteMany({});
     console.log(`   ✅ Deleted ${deletedItems.count} items`);
+
+    console.log("8. Clearing Employees...");
+    const deletedEmployees = await prisma.employee.deleteMany({});
+    console.log(`   ✅ Deleted ${deletedEmployees.count} employees`);
+
+    console.log("9. Clearing Customers...");
+    const deletedCustomers = await prisma.customer.deleteMany({});
+    console.log(`   ✅ Deleted ${deletedCustomers.count} customers`);
+
+    console.log("10. Clearing Users...");
+    const deletedUsers = await prisma.user.deleteMany({});
+    console.log(`   ✅ Deleted ${deletedUsers.count} users`);
+
+    console.log("11. Clearing Settings...");
+    const deletedSettings = await prisma.setting.deleteMany({});
+    console.log(`   ✅ Deleted ${deletedSettings.count} settings`);
 
     console.log("\n🎉 Data cleanup completed successfully!");
     console.log("\nSummary:");
     console.log(`- Sale Items: ${deletedSaleItems.count}`);
     console.log(`- Sales: ${deletedSales.count}`);
     console.log(`- Inventory Records: ${deletedInventoryRecords.count}`);
+    console.log(`- Employee Services: ${deletedEmployeeServices.count}`);
+    console.log(`- Expenses: ${deletedExpenses.count}`);
+    console.log(`- Expense Categories: ${deletedExpenseCategories.count}`);
     console.log(`- Items: ${deletedItems.count}`);
+    console.log(`- Employees: ${deletedEmployees.count}`);
+    console.log(`- Customers: ${deletedCustomers.count}`);
+    console.log(`- Users: ${deletedUsers.count}`);
+    console.log(`- Settings: ${deletedSettings.count}`);
   } catch (error) {
     console.error("❌ Error during data cleanup:", error);
     throw error;

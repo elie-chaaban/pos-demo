@@ -12,6 +12,7 @@ import {
 import { formatCurrency, formatNumber } from "../lib/utils";
 import { toast } from "sonner";
 import LoadingButton from "./LoadingButton";
+import InvoicePopup from "./InvoicePopup";
 import {
   Item,
   EmployeeWithCommission,
@@ -38,6 +39,7 @@ export default function POSInterface() {
   const [itemEmployees, setItemEmployees] = useState<
     Record<string, EmployeeWithCommission[]>
   >({});
+  const [showInvoicePopup, setShowInvoicePopup] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -236,7 +238,7 @@ export default function POSInterface() {
     }, 0);
   };
 
-  const checkout = async () => {
+  const checkout = () => {
     if (cart.length === 0) {
       toast.error("Cart is empty!");
       return;
@@ -251,6 +253,11 @@ export default function POSInterface() {
       return;
     }
 
+    // Show the invoice popup instead of immediately processing
+    setShowInvoicePopup(true);
+  };
+
+  const processPayment = async () => {
     const total = calculateTotal();
 
     const saleItems = cart.map((cartItem) => {
@@ -637,12 +644,14 @@ export default function POSInterface() {
                       className="input-modern text-sm"
                     />
                     <div className="flex space-x-2">
-                      <button
+                      <LoadingButton
                         onClick={addNewCustomer}
-                        className="flex-1 bg-indigo-600 text-white py-2 px-3 rounded text-xs font-semibold hover:bg-indigo-700 transition-colors cursor-pointer"
+                        variant="primary"
+                        size="sm"
+                        className="flex-1"
                       >
                         Add Customer
-                      </button>
+                      </LoadingButton>
                       <button
                         onClick={() => {
                           setShowAddCustomer(false);
@@ -678,6 +687,18 @@ export default function POSInterface() {
           </div>
         </div>
       </div>
+
+      {/* Invoice Popup */}
+      <InvoicePopup
+        isOpen={showInvoicePopup}
+        onClose={() => setShowInvoicePopup(false)}
+        onConfirm={processPayment}
+        cart={cart}
+        items={items}
+        customers={customers}
+        selectedCustomer={selectedCustomer}
+        total={total}
+      />
     </div>
   );
 }
