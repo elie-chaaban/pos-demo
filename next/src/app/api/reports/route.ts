@@ -333,6 +333,167 @@ async function generateCustomerLifetimeValueReport(
   };
 }
 
+// Helper function to generate invoices report
+async function generateInvoicesReport(startDate: Date, endDate: Date) {
+  const sales = await prisma.sale.findMany({
+    where: {
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    include: {
+      customer: true,
+      items: {
+        include: {
+          item: true,
+          employee: true,
+        },
+      },
+    },
+    orderBy: {
+      date: "desc",
+    },
+  });
+
+  const invoices = sales.map((sale) => {
+    const items = sale.items.map((saleItem) => ({
+      id: saleItem.id,
+      itemName: saleItem.item.name,
+      itemPrice: saleItem.price,
+      quantity: saleItem.quantity,
+      total: saleItem.total,
+      employeeName: saleItem.employee.name,
+      commissionRate: saleItem.commissionRate || 0,
+      commissionAmount: saleItem.commissionAmount || 0,
+      isService: saleItem.item.isService,
+    }));
+
+    return {
+      id: sale.id,
+      date: sale.date.toISOString(),
+      customer: sale.customer
+        ? {
+            id: sale.customer.id,
+            name: sale.customer.name,
+            email: sale.customer.email || undefined,
+            phone: sale.customer.phone || "",
+          }
+        : null,
+      subtotal: sale.subtotal,
+      tax: sale.tax,
+      total: sale.total,
+      itemCount: items.length,
+      totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+      items,
+      createdAt: sale.createdAt.toISOString(),
+    };
+  });
+
+  return {
+    invoices,
+  };
+}
+
+// Helper function to generate employee performance report
+async function generateEmployeePerformanceReport(
+  startDate: Date,
+  endDate: Date
+) {
+  const sales = await prisma.sale.findMany({
+    where: {
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    include: {
+      items: {
+        include: {
+          item: true,
+          employee: true,
+        },
+      },
+    },
+  });
+
+  const employeeMap = new Map();
+
+  sales.forEach((sale) => {
+    sale.items.forEach((saleItem) => {
+      const employee = saleItem.employee;
+      const employeeId = employee.id;
+
+      if (!employeeMap.has(employeeId)) {
+        employeeMap.set(employeeId, {
+          id: employeeId,
+          name: employee.name,
+          totalSales: 0,
+          commission: 0,
+          itemsSold: 0,
+          transactionCount: 0,
+          averageTransactionValue: 0,
+          topItems: new Map(),
+        });
+      }
+
+      const empData = employeeMap.get(employeeId);
+      empData.totalSales += saleItem.total;
+      empData.commission += saleItem.commissionAmount || 0;
+      empData.itemsSold += saleItem.quantity;
+
+      // Track top items for this employee
+      const itemName = saleItem.item.name;
+      if (!empData.topItems.has(itemName)) {
+        empData.topItems.set(itemName, {
+          itemName,
+          quantitySold: 0,
+          revenue: 0,
+        });
+      }
+      const itemData = empData.topItems.get(itemName);
+      itemData.quantitySold += saleItem.quantity;
+      itemData.revenue += saleItem.total;
+    });
+  });
+
+  // Count unique transactions per employee
+  const employeeTransactions = new Map();
+  sales.forEach((sale) => {
+    sale.items.forEach((saleItem) => {
+      const employeeId = saleItem.employee.id;
+      if (!employeeTransactions.has(employeeId)) {
+        employeeTransactions.set(employeeId, new Set());
+      }
+      employeeTransactions.get(employeeId).add(sale.id);
+    });
+  });
+
+  // Convert to array and calculate final metrics
+  const employees = Array.from(employeeMap.values()).map((emp) => {
+    const transactionCount = employeeTransactions.get(emp.id)?.size || 0;
+    const averageTransactionValue =
+      transactionCount > 0 ? emp.totalSales / transactionCount : 0;
+
+    return {
+      id: emp.id,
+      name: emp.name,
+      totalSales: emp.totalSales,
+      commission: emp.commission,
+      itemsSold: emp.itemsSold,
+      transactionCount,
+      averageTransactionValue,
+      topItems: Array.from(emp.topItems.values())
+        .sort((a: any, b: any) => b.revenue - a.revenue)
+        .slice(0, 5), // Top 5 items
+    };
+  });
+
+  return {
+    employees: employees.sort((a, b) => b.totalSales - a.totalSales),
+  };
+}
+
 // Helper function to generate low stock alert report
 async function generateLowStockReport() {
   const items = await prisma.item.findMany({
@@ -746,9 +907,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(expensesData);
     }
 
+    if (type === "invoices") {
+      const invoicesData = await generateInvoicesReport(startDate, endDate);
+      return NextResponse.json(invoicesData);
+    }
+
     if (type === "low-stock") {
       const lowStockData = await generateLowStockReport();
       return NextResponse.json(lowStockData);
+    }
+
+    if (type === "employee-performance") {
+      const employeePerfData = await generateEmployeePerformanceReport(
+        startDate,
+        endDate
+      );
+      return NextResponse.json(employeePerfData);
     }
 
     if (type === "customer-lifetime-value") {
