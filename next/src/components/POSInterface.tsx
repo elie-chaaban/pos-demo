@@ -607,42 +607,6 @@ export default function POSInterface() {
                       }
                       className="input-modern text-sm"
                     />
-                    <input
-                      type="email"
-                      placeholder="Email (Optional)"
-                      value={newCustomer.email}
-                      onChange={(e) =>
-                        setNewCustomer({
-                          ...newCustomer,
-                          email: e.target.value,
-                        })
-                      }
-                      className="input-modern text-sm"
-                    />
-                    <input
-                      type="date"
-                      placeholder="Date of Birth (Optional)"
-                      value={newCustomer.dateOfBirth}
-                      onChange={(e) =>
-                        setNewCustomer({
-                          ...newCustomer,
-                          dateOfBirth: e.target.value,
-                        })
-                      }
-                      className="input-modern text-sm"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Address (Optional)"
-                      value={newCustomer.address}
-                      onChange={(e) =>
-                        setNewCustomer({
-                          ...newCustomer,
-                          address: e.target.value,
-                        })
-                      }
-                      className="input-modern text-sm"
-                    />
                     <div className="flex space-x-2">
                       <LoadingButton
                         onClick={addNewCustomer}
