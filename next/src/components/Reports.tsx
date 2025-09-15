@@ -163,7 +163,7 @@ export default function Reports() {
     startDate: "",
     endDate: "",
   });
-  const [useCustomRange, setUseCustomRange] = useState(false);
+  const [useCustomRange] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [itemSalesData, setItemSalesData] = useState<{
     items: ItemSalesData[];
@@ -193,9 +193,7 @@ export default function Reports() {
       }>;
     }>;
   } | null>(null);
-  const [lowStockData, setLowStockData] = useState<{
-    items: LowStockData[];
-  } | null>(null);
+  const [lowStockData, setLowStockData] = useState<LowStockData | null>(null);
 
   const fetchReportData = useCallback(async () => {
     setLoading(true);
@@ -270,9 +268,6 @@ export default function Reports() {
     fetchReportData();
   }, [fetchReportData]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
 
   return (
     <div className="space-y-6">

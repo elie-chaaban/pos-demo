@@ -3,21 +3,10 @@
 import { useState } from "react";
 import { Package, Search, Download } from "lucide-react";
 import { formatNumber } from "../../lib/utils";
-
-interface LowStockData {
-  id: string;
-  name: string;
-  currentStock: number;
-  reorderThreshold: number;
-  category: string;
-  lastRestocked?: string;
-  supplier?: string;
-}
+import { LowStockData } from "../../types";
 
 interface LowStockTabProps {
-  lowStockData: {
-    items: LowStockData[];
-  } | null;
+  lowStockData: LowStockData | null;
   selectedPeriod: string;
 }
 
@@ -26,17 +15,14 @@ const formatDate = (dateString: string) => {
 };
 
 const filterAndSortData = (
-  data: LowStockData[],
+  data: LowStockData["items"],
   searchTerm: string,
   sortBy: string,
   sortOrder: string
 ) => {
   const filtered = data.filter(
     (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.supplier &&
-        item.supplier.toLowerCase().includes(searchTerm.toLowerCase()))
+      item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   filtered.sort((a, b) => {
@@ -71,7 +57,7 @@ const filterAndSortData = (
   return filtered;
 };
 
-const exportToCSV = (data: LowStockData[], filename: string) => {
+const exportToCSV = (data: LowStockData["items"], filename: string) => {
   if (!data || data.length === 0) return;
 
   const headers = Object.keys(data[0]);
@@ -79,7 +65,7 @@ const exportToCSV = (data: LowStockData[], filename: string) => {
     headers.join(","),
     ...data.map((row) =>
       headers
-        .map((header) => `"${row[header as keyof LowStockData] || ""}"`)
+        .map((header) => `"${row[header as keyof typeof row] || ""}"`)
         .join(",")
     ),
   ].join("\n");
@@ -177,13 +163,13 @@ export default function LowStockTab({
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
+                    Price
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Last Restocked
+                    Stock Value
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Supplier
+                    Last Updated
                   </th>
                 </tr>
               </thead>
@@ -194,10 +180,6 @@ export default function LowStockTab({
                   sortBy,
                   sortOrder
                 ).map((item, index: number) => {
-                  const isCritical = item.currentStock <= item.reorderThreshold;
-                  const isLow =
-                    item.currentStock <= item.reorderThreshold * 1.5;
-
                   return (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -214,26 +196,24 @@ export default function LowStockTab({
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            isCritical
+                            item.status === "Out of Stock"
                               ? "bg-red-100 text-red-800"
-                              : isLow
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-green-100 text-green-800"
+                              : item.status === "Critical"
+                              ? "bg-orange-100 text-orange-800"
+                              : "bg-yellow-100 text-yellow-800"
                           }`}
                         >
-                          {isCritical ? "Critical" : isLow ? "Low" : "OK"}
+                          {item.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.category}
+                        ${formatNumber(item.price)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.lastRestocked
-                          ? formatDate(item.lastRestocked)
-                          : "Never"}
+                        ${formatNumber(item.stockValue)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.supplier || "-"}
+                        {formatDate(item.lastUpdated)}
                       </td>
                     </tr>
                   );
