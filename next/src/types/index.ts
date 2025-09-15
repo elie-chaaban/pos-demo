@@ -34,6 +34,8 @@ export interface Item {
   stock: number;
   isService: boolean;
   description?: string;
+  averageCost?: number;
+  reorderThreshold?: number;
   createdAt: string;
   updatedAt: string;
   employeeServices?: EmployeeService[];
@@ -124,6 +126,7 @@ export interface ItemFormData {
   stock: number;
   isService: boolean;
   description: string;
+  reorderThreshold?: number;
 }
 
 export interface ExpenseCategoryFormData {
@@ -187,4 +190,37 @@ export interface LoadingButtonProps {
   disabled?: boolean;
   className?: string;
   icon?: React.ReactNode;
+}
+
+// Low Stock Alert types
+export interface LowStockItem {
+  id: string;
+  name: string;
+  currentStock: number;
+  reorderThreshold: number;
+  price: number;
+  averageCost: number;
+  stockValue: number;
+  status: "Out of Stock" | "Critical" | "Low";
+  daysUntilOutOfStock: number;
+  suggestedReorderQuantity: number;
+  lastUpdated: string;
+}
+
+export interface LowStockData {
+  items: LowStockItem[];
+  summary: {
+    totalLowStockItems: number;
+    outOfStockItems: number;
+    criticalStockItems: number;
+    warningStockItems: number;
+    totalValueAtRisk: number;
+    potentialLostSales: number;
+    averageStockLevel: number;
+  };
+  alerts: {
+    urgent: boolean;
+    warning: boolean;
+    message: string;
+  };
 }

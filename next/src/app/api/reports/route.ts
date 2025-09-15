@@ -176,6 +176,85 @@ async function generateExpensesReport(startDate: Date, endDate: Date) {
   };
 }
 
+// Helper function to generate low stock alert report
+async function generateLowStockReport() {
+  const items = await prisma.item.findMany({
+    where: {
+      isService: false, // Only physical items, not services
+    },
+    orderBy: {
+      stock: "asc",
+    },
+  });
+
+  const lowStockItems = items.filter((item) => {
+    const threshold = item.reorderThreshold ?? 5; // Default to 5 if not set
+    return item.stock <= threshold;
+  });
+
+  const outOfStockItems = items.filter((item) => item.stock === 0);
+  const criticalStockItems = lowStockItems.filter((item) => item.stock === 0);
+  const warningStockItems = lowStockItems.filter((item) => item.stock > 0);
+
+  // Calculate total inventory value at risk
+  const totalValueAtRisk = lowStockItems.reduce((sum, item) => {
+    return sum + item.stock * (item.averageCost || 0);
+  }, 0);
+
+  // Calculate potential lost sales (items that could be sold if in stock)
+  const potentialLostSales = lowStockItems.reduce((sum, item) => {
+    const threshold = item.reorderThreshold ?? 5;
+    const potentialSales = Math.max(0, threshold - item.stock);
+    return sum + potentialSales * item.price;
+  }, 0);
+
+  const lowStockData = lowStockItems.map((item) => ({
+    id: item.id,
+    name: item.name,
+    currentStock: item.stock,
+    reorderThreshold: item.reorderThreshold ?? 5,
+    price: item.price,
+    averageCost: item.averageCost || 0,
+    stockValue: item.stock * (item.averageCost || 0),
+    status:
+      item.stock === 0
+        ? "Out of Stock"
+        : item.stock <= (item.reorderThreshold ?? 5) * 0.5
+        ? "Critical"
+        : "Low",
+    daysUntilOutOfStock: item.stock > 0 ? Math.ceil(item.stock / 2) : 0, // Rough estimate
+    suggestedReorderQuantity: Math.max((item.reorderThreshold ?? 5) * 2, 10),
+    lastUpdated: item.updatedAt.toISOString(),
+  }));
+
+  return {
+    items: lowStockData,
+    summary: {
+      totalLowStockItems: lowStockItems.length,
+      outOfStockItems: outOfStockItems.length,
+      criticalStockItems: criticalStockItems.length,
+      warningStockItems: warningStockItems.length,
+      totalValueAtRisk: totalValueAtRisk,
+      potentialLostSales: potentialLostSales,
+      averageStockLevel:
+        lowStockItems.length > 0
+          ? lowStockItems.reduce((sum, item) => sum + item.stock, 0) /
+            lowStockItems.length
+          : 0,
+    },
+    alerts: {
+      urgent: criticalStockItems.length > 0,
+      warning: warningStockItems.length > 0,
+      message:
+        criticalStockItems.length > 0
+          ? `${criticalStockItems.length} items are out of stock!`
+          : warningStockItems.length > 0
+          ? `${warningStockItems.length} items are running low on stock.`
+          : "All items are adequately stocked.",
+    },
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -508,6 +587,11 @@ export async function GET(request: NextRequest) {
     if (type === "expenses") {
       const expensesData = await generateExpensesReport(startDate, endDate);
       return NextResponse.json(expensesData);
+    }
+
+    if (type === "low-stock") {
+      const lowStockData = await generateLowStockReport();
+      return NextResponse.json(lowStockData);
     }
 
     return NextResponse.json({

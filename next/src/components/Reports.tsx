@@ -20,8 +20,9 @@ import {
   X,
   Calendar,
 } from "lucide-react";
-import { formatCurrency, formatNumber, formatPercentage } from "../lib/utils";
+import { formatCurrency, formatNumber } from "../lib/utils";
 import { toast } from "sonner";
+import { LowStockData } from "../types";
 
 interface ItemSalesData extends Record<string, unknown> {
   id: string;
@@ -202,6 +203,7 @@ export default function Reports() {
   const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(
     null
   );
+  const [lowStockData, setLowStockData] = useState<LowStockData | null>(null);
 
   const fetchItemSalesData = useCallback(async () => {
     try {
@@ -303,6 +305,16 @@ export default function Reports() {
     customDateRange.endDate,
   ]);
 
+  const fetchLowStockData = useCallback(async () => {
+    try {
+      const response = await fetch("/api/reports?type=low-stock");
+      const data = await response.json();
+      setLowStockData(data);
+    } catch (error) {
+      console.error("Error fetching low stock data:", error);
+    }
+  }, []);
+
   const generateReport = useCallback(async () => {
     setLoading(true);
     try {
@@ -326,6 +338,7 @@ export default function Reports() {
         fetchCustomerSalesData(),
         fetchExpensesData(),
         fetchInvoicesData(),
+        fetchLowStockData(),
       ]);
     } catch (error) {
       console.error("Error generating report:", error);
@@ -342,6 +355,7 @@ export default function Reports() {
     fetchCustomerSalesData,
     fetchExpensesData,
     fetchInvoicesData,
+    fetchLowStockData,
   ]);
 
   useEffect(() => {
@@ -486,6 +500,11 @@ export default function Reports() {
                   id: "employee-performance",
                   name: "Employee Performance",
                   icon: Users,
+                },
+                {
+                  id: "low-stock",
+                  name: "Low Stock Alert",
+                  icon: Package,
                 },
               ].map((tab) => {
                 const Icon = tab.icon;
@@ -2017,6 +2036,256 @@ export default function Reports() {
                     <p className="text-gray-500">
                       No employee performance data available for the selected
                       period.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Low Stock Alert Tab */}
+          {activeTab === "low-stock" && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-600 rounded-xl flex items-center justify-center mr-4">
+                      <Package className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        Low Stock Alert Report
+                      </h3>
+                      <p className="text-gray-600">
+                        Items below reorder threshold requiring immediate
+                        attention
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <button
+                      onClick={() =>
+                        exportToCSV(
+                          (lowStockData?.items || []) as unknown as Record<
+                            string,
+                            unknown
+                          >[],
+                          `low-stock-alert-${
+                            new Date().toISOString().split("T")[0]
+                          }`
+                        )
+                      }
+                      className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 cursor-pointer"
+                    >
+                      <Download className="w-4 h-4" />
+                      <span>Export</span>
+                    </button>
+                  </div>
+                </div>
+
+                {lowStockData && lowStockData.items.length > 0 ? (
+                  <>
+                    {/* Alert Summary */}
+                    <div
+                      className="mb-6 p-4 rounded-lg border-l-4 bg-gray-50"
+                      style={{
+                        borderLeftColor: lowStockData.alerts.urgent
+                          ? "#ef4444"
+                          : "#f59e0b",
+                      }}
+                    >
+                      <div className="flex items-center">
+                        <div
+                          className={`w-3 h-3 rounded-full mr-3 ${
+                            lowStockData.alerts.urgent
+                              ? "bg-red-500"
+                              : "bg-yellow-500"
+                          }`}
+                        ></div>
+                        <p
+                          className={`font-semibold ${
+                            lowStockData.alerts.urgent
+                              ? "text-red-700"
+                              : "text-yellow-700"
+                          }`}
+                        >
+                          {lowStockData.alerts.message}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                      <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-6 text-white">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-red-100 text-sm font-medium">
+                              Out of Stock
+                            </p>
+                            <p className="text-3xl font-bold">
+                              {lowStockData.summary.outOfStockItems}
+                            </p>
+                          </div>
+                          <div className="w-12 h-12 bg-red-400 rounded-lg flex items-center justify-center">
+                            <Package className="w-6 h-6" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl p-6 text-white">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-yellow-100 text-sm font-medium">
+                              Low Stock
+                            </p>
+                            <p className="text-3xl font-bold">
+                              {lowStockData.summary.warningStockItems}
+                            </p>
+                          </div>
+                          <div className="w-12 h-12 bg-yellow-400 rounded-lg flex items-center justify-center">
+                            <Package className="w-6 h-6" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-blue-100 text-sm font-medium">
+                              Value at Risk
+                            </p>
+                            <p className="text-2xl font-bold">
+                              {formatCurrency(
+                                lowStockData.summary.totalValueAtRisk
+                              )}
+                            </p>
+                          </div>
+                          <div className="w-12 h-12 bg-blue-400 rounded-lg flex items-center justify-center">
+                            <DollarSign className="w-6 h-6" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-purple-100 text-sm font-medium">
+                              Potential Lost Sales
+                            </p>
+                            <p className="text-2xl font-bold">
+                              {formatCurrency(
+                                lowStockData.summary.potentialLostSales
+                              )}
+                            </p>
+                          </div>
+                          <div className="w-12 h-12 bg-purple-400 rounded-lg flex items-center justify-center">
+                            <TrendingUp className="w-6 h-6" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Low Stock Items Table */}
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Item
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Current Stock
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Reorder Threshold
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Status
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Stock Value
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Suggested Reorder
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Days Until Out
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {lowStockData.items.map((item) => (
+                            <tr key={item.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-full flex items-center justify-center mr-3">
+                                    <span className="text-white font-bold text-sm">
+                                      {item.name.charAt(0).toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-900">
+                                      {item.name}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                      {formatCurrency(item.price)} each
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                    item.currentStock === 0
+                                      ? "bg-red-100 text-red-800"
+                                      : item.currentStock <=
+                                        item.reorderThreshold * 0.5
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-orange-100 text-orange-800"
+                                  }`}
+                                >
+                                  {item.currentStock}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {item.reorderThreshold}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span
+                                  className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                    item.status === "Out of Stock"
+                                      ? "bg-red-100 text-red-800"
+                                      : item.status === "Critical"
+                                      ? "bg-yellow-100 text-yellow-800"
+                                      : "bg-orange-100 text-orange-800"
+                                  }`}
+                                >
+                                  {item.status}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {formatCurrency(item.stockValue)}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {item.suggestedReorderQuantity}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {item.daysUntilOutOfStock > 0
+                                  ? `${item.daysUntilOutOfStock} days`
+                                  : "Out of stock"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-12">
+                    <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-500">
+                      All items are adequately stocked! No low stock alerts at
+                      this time.
                     </p>
                   </div>
                 )}

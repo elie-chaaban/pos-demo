@@ -30,6 +30,7 @@ export default function ItemManagement() {
     stock: 0,
     isService: false,
     description: "",
+    reorderThreshold: 5,
   });
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function ItemManagement() {
           stock: 0,
           isService: false,
           description: "",
+          reorderThreshold: 5,
         });
         toast.success(
           editingItem
@@ -96,6 +98,7 @@ export default function ItemManagement() {
       stock: item.stock,
       isService: item.isService,
       description: item.description || "",
+      reorderThreshold: item.reorderThreshold || 5,
     });
     setShowModal(true);
   };
@@ -135,6 +138,7 @@ export default function ItemManagement() {
       stock: 0,
       isService: false,
       description: "",
+      reorderThreshold: 5,
     });
     setShowModal(true);
   };
@@ -148,6 +152,7 @@ export default function ItemManagement() {
       stock: 0,
       isService: false,
       description: "",
+      reorderThreshold: 5,
     });
   };
 
@@ -195,15 +200,6 @@ export default function ItemManagement() {
               <div className="text-sm text-gray-500 font-medium">
                 Inventory Value
               </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600">
-                {
-                  items.filter((item) => !item.isService && item.stock <= 5)
-                    .length
-                }
-              </div>
-              <div className="text-sm text-gray-500 font-medium">{`Low Stock (<=5)`}</div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-blue-600">
@@ -409,25 +405,49 @@ export default function ItemManagement() {
                 </div>
 
                 {!formData.isService && (
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Stock
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      required
-                      value={formData.stock}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          stock: parseInt(e.target.value) || 0,
-                        })
-                      }
-                      className="input-modern"
-                      placeholder="0"
-                    />
-                  </div>
+                  <>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Stock
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        required
+                        value={formData.stock}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            stock: parseInt(e.target.value) || 0,
+                          })
+                        }
+                        className="input-modern"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Reorder Threshold
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        required
+                        value={formData.reorderThreshold}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            reorderThreshold: parseInt(e.target.value) || 5,
+                          })
+                        }
+                        className="input-modern"
+                        placeholder="5"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Alert when stock falls below this level
+                      </p>
+                    </div>
+                  </>
                 )}
               </div>
 

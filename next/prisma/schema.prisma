@@ -57,6 +57,7 @@ model Item {
   isService        Boolean           @default(false)
   description      String?
   averageCost      Float?            @default(0)
+  reorderThreshold Int?              @default(5)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
   employeeServices EmployeeService[]
