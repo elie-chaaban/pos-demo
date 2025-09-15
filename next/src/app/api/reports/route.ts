@@ -176,6 +176,163 @@ async function generateExpensesReport(startDate: Date, endDate: Date) {
   };
 }
 
+// Helper function to generate customer lifetime value report
+async function generateCustomerLifetimeValueReport(
+  startDate: Date,
+  endDate: Date
+) {
+  // Get all sales data for customers (not limited by date range for lifetime calculation)
+  const allSales = await prisma.sale.findMany({
+    include: {
+      customer: true,
+      items: {
+        include: {
+          item: true,
+        },
+      },
+    },
+    orderBy: {
+      date: "desc",
+    },
+  });
+
+  // Get all customers
+  const customers = await prisma.customer.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  const customerMap = new Map();
+
+  // Initialize all customers
+  customers.forEach((customer) => {
+    customerMap.set(customer.id, {
+      id: customer.id,
+      name: customer.name,
+      email: customer.email || "",
+      phone: customer.phone || "",
+      totalLifetimeValue: 0,
+      totalTransactions: 0,
+      averageOrderValue: 0,
+      firstPurchase: null,
+      lastPurchase: null,
+      daysSinceLastPurchase: 0,
+      purchaseFrequency: 0, // purchases per month
+      customerLifespan: 0, // days between first and last purchase
+      clvTier: "Bronze", // Bronze, Silver, Gold, Platinum
+      recentActivity: 0, // value in selected period
+      recentTransactions: 0, // transactions in selected period
+    });
+  });
+
+  // Calculate lifetime metrics
+  allSales.forEach((sale) => {
+    if (sale.customer) {
+      const customerId = sale.customer.id;
+      const customer = customerMap.get(customerId);
+
+      if (customer) {
+        customer.totalLifetimeValue += sale.total;
+        customer.totalTransactions += 1;
+
+        // Track first and last purchase
+        if (!customer.firstPurchase || sale.date < customer.firstPurchase) {
+          customer.firstPurchase = sale.date;
+        }
+        if (!customer.lastPurchase || sale.date > customer.lastPurchase) {
+          customer.lastPurchase = sale.date;
+        }
+
+        // Track recent activity (within selected period)
+        if (sale.date >= startDate && sale.date <= endDate) {
+          customer.recentActivity += sale.total;
+          customer.recentTransactions += 1;
+        }
+      }
+    }
+  });
+
+  // Calculate derived metrics and categorize customers
+  const now = new Date();
+  customerMap.forEach((customer) => {
+    if (customer.totalTransactions > 0) {
+      customer.averageOrderValue =
+        customer.totalLifetimeValue / customer.totalTransactions;
+
+      if (customer.lastPurchase) {
+        customer.daysSinceLastPurchase = Math.floor(
+          (now.getTime() - customer.lastPurchase.getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
+      }
+
+      if (customer.firstPurchase && customer.lastPurchase) {
+        customer.customerLifespan = Math.floor(
+          (customer.lastPurchase.getTime() - customer.firstPurchase.getTime()) /
+            (1000 * 60 * 60 * 24)
+        );
+
+        // Calculate purchase frequency (purchases per month)
+        const monthsActive = Math.max(1, customer.customerLifespan / 30);
+        customer.purchaseFrequency = customer.totalTransactions / monthsActive;
+      }
+
+      // Categorize customers by CLV tier
+      if (customer.totalLifetimeValue >= 1000) {
+        customer.clvTier = "Platinum";
+      } else if (customer.totalLifetimeValue >= 500) {
+        customer.clvTier = "Gold";
+      } else if (customer.totalLifetimeValue >= 200) {
+        customer.clvTier = "Silver";
+      } else {
+        customer.clvTier = "Bronze";
+      }
+    }
+  });
+
+  // Convert to array and sort by lifetime value
+  const clvData = Array.from(customerMap.values())
+    .filter((customer) => customer.totalTransactions > 0) // Only include customers with purchases
+    .sort((a, b) => b.totalLifetimeValue - a.totalLifetimeValue);
+
+  // Calculate summary statistics
+  const totalCustomers = clvData.length;
+  const totalLifetimeValue = clvData.reduce(
+    (sum, customer) => sum + customer.totalLifetimeValue,
+    0
+  );
+  const averageLifetimeValue =
+    totalCustomers > 0 ? totalLifetimeValue / totalCustomers : 0;
+
+  // Tier distribution
+  const tierDistribution = {
+    Platinum: clvData.filter((c) => c.clvTier === "Platinum").length,
+    Gold: clvData.filter((c) => c.clvTier === "Gold").length,
+    Silver: clvData.filter((c) => c.clvTier === "Silver").length,
+    Bronze: clvData.filter((c) => c.clvTier === "Bronze").length,
+  };
+
+  // Top customers by recent activity
+  const topRecentCustomers = clvData
+    .filter((customer) => customer.recentActivity > 0)
+    .sort((a, b) => b.recentActivity - a.recentActivity)
+    .slice(0, 10);
+
+  return {
+    customers: clvData,
+    summary: {
+      totalCustomers,
+      totalLifetimeValue,
+      averageLifetimeValue,
+      tierDistribution,
+      topRecentCustomers,
+      periodStart: startDate.toISOString(),
+      periodEnd: endDate.toISOString(),
+    },
+  };
+}
+
 // Helper function to generate low stock alert report
 async function generateLowStockReport() {
   const items = await prisma.item.findMany({
@@ -592,6 +749,14 @@ export async function GET(request: NextRequest) {
     if (type === "low-stock") {
       const lowStockData = await generateLowStockReport();
       return NextResponse.json(lowStockData);
+    }
+
+    if (type === "customer-lifetime-value") {
+      const clvData = await generateCustomerLifetimeValueReport(
+        startDate,
+        endDate
+      );
+      return NextResponse.json(clvData);
     }
 
     return NextResponse.json({

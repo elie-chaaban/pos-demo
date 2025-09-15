@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   User,
   Receipt,
+  Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { LowStockData } from "../types";
@@ -20,6 +21,7 @@ import ExpensesTab from "./reports/ExpensesTab";
 import InvoicesTab from "./reports/InvoicesTab";
 import EmployeePerformanceTab from "./reports/EmployeePerformanceTab";
 import LowStockTab from "./reports/LowStockTab";
+import CustomerLifetimeValueTab from "./reports/CustomerLifetimeValueTab";
 
 interface ItemSalesData extends Record<string, unknown> {
   id: string;
@@ -76,6 +78,24 @@ interface InvoiceData extends Record<string, unknown> {
     isService: boolean;
   }>;
   createdAt: string;
+}
+
+interface CustomerLifetimeValueData extends Record<string, unknown> {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  totalLifetimeValue: number;
+  totalTransactions: number;
+  averageOrderValue: number;
+  firstPurchase: string | null;
+  lastPurchase: string | null;
+  daysSinceLastPurchase: number;
+  purchaseFrequency: number;
+  customerLifespan: number;
+  clvTier: "Bronze" | "Silver" | "Gold" | "Platinum";
+  recentActivity: number;
+  recentTransactions: number;
 }
 
 interface ReportData {
@@ -194,6 +214,23 @@ export default function Reports() {
     }>;
   } | null>(null);
   const [lowStockData, setLowStockData] = useState<LowStockData | null>(null);
+  const [clvData, setClvData] = useState<{
+    customers: CustomerLifetimeValueData[];
+    summary: {
+      totalCustomers: number;
+      totalLifetimeValue: number;
+      averageLifetimeValue: number;
+      tierDistribution: {
+        Platinum: number;
+        Gold: number;
+        Silver: number;
+        Bronze: number;
+      };
+      topRecentCustomers: CustomerLifetimeValueData[];
+      periodStart: string;
+      periodEnd: string;
+    };
+  } | null>(null);
 
   const fetchReportData = useCallback(async () => {
     setLoading(true);
@@ -220,6 +257,7 @@ export default function Reports() {
         invoicesRes,
         employeePerfRes,
         lowStockRes,
+        clvRes,
       ] = await Promise.all([
         fetch(`${url}&type=item-sales`),
         fetch(`${url}&type=customer-sales`),
@@ -227,6 +265,7 @@ export default function Reports() {
         fetch(`${url}&type=invoices`),
         fetch(`${url}&type=employee-performance`),
         fetch(`${url}&type=low-stock`),
+        fetch(`${url}&type=customer-lifetime-value`),
       ]);
 
       const [
@@ -236,6 +275,7 @@ export default function Reports() {
         invoices,
         employeePerf,
         lowStock,
+        clv,
       ] = await Promise.all([
         itemSalesRes.json(),
         customerSalesRes.json(),
@@ -243,6 +283,7 @@ export default function Reports() {
         invoicesRes.json(),
         employeePerfRes.json(),
         lowStockRes.json(),
+        clvRes.json(),
       ]);
 
       setItemSalesData(itemSales);
@@ -251,6 +292,7 @@ export default function Reports() {
       setInvoicesData(invoices);
       setEmployeePerformanceData(employeePerf);
       setLowStockData(lowStock);
+      setClvData(clv);
     } catch (error) {
       console.error("Error fetching report data:", error);
       toast.error("Error loading reports. Please try again.");
@@ -348,6 +390,11 @@ export default function Reports() {
                 { id: "overview", name: "Overview", icon: BarChart3 },
                 { id: "item-sales", name: "Item Sales", icon: ShoppingCart },
                 { id: "customer-sales", name: "Customer Sales", icon: User },
+                {
+                  id: "customer-lifetime-value",
+                  name: "Customer Lifetime Value",
+                  icon: Crown,
+                },
                 { id: "expenses", name: "Expenses", icon: CreditCard },
                 { id: "invoices", name: "Invoices", icon: Receipt },
                 {
@@ -418,6 +465,13 @@ export default function Reports() {
           {activeTab === "customer-sales" && (
             <CustomerSalesTab
               customerSalesData={customerSalesData}
+              selectedPeriod={selectedPeriod}
+            />
+          )}
+
+          {activeTab === "customer-lifetime-value" && (
+            <CustomerLifetimeValueTab
+              clvData={clvData}
               selectedPeriod={selectedPeriod}
             />
           )}
