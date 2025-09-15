@@ -268,7 +268,6 @@ export default function Reports() {
     fetchReportData();
   }, [fetchReportData]);
 
-
   return (
     <div className="space-y-6">
       {/* Header */}

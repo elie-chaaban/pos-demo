@@ -20,9 +20,8 @@ const filterAndSortData = (
   sortBy: string,
   sortOrder: string
 ) => {
-  const filtered = data.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = data.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   filtered.sort((a, b) => {
