@@ -33,7 +33,7 @@ type Section =
   | "customers"
   | "employees"
   | "items"
-  | "inventory"
+  | "transactions"
   | "expenses"
   | "expense-categories"
   | "reports"
@@ -44,7 +44,7 @@ const navigation = [
   { id: "customers", name: "Customers", icon: Users },
   { id: "employees", name: "Employees", icon: UserStar },
   { id: "items", name: "Items", icon: Package },
-  { id: "inventory", name: "Inventory", icon: Warehouse },
+  { id: "transactions", name: "Transactions", icon: Warehouse },
   { id: "expenses", name: "Expenses", icon: Receipt },
   { id: "expense-categories", name: "Expense Categories", icon: Tags },
   { id: "reports", name: "Reports", icon: BarChart3 },
@@ -66,7 +66,7 @@ export default function Home() {
         return <EmployeeManagement />;
       case "items":
         return <ItemManagement />;
-      case "inventory":
+      case "transactions":
         return <InventoryManagement />;
       case "expenses":
         return <ExpenseManagement />;
@@ -309,7 +309,7 @@ export default function Home() {
                           "Manage staff and employee details"}
                         {activeSection === "items" &&
                           "Manage products and services catalog"}
-                        {activeSection === "inventory" &&
+                        {activeSection === "transactions" &&
                           "Track stock levels and inventory management"}
                         {activeSection === "expenses" &&
                           "Record and manage business expenses"}
