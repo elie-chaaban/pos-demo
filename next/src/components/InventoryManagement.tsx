@@ -209,15 +209,43 @@ export default function InventoryManagement() {
     );
   }
 
+  // Calculate meaningful inventory metrics
+  const purchaseValue = inventoryRecords
+    .filter((record) => record.type === "Purchase")
+    .reduce((sum, record) => sum + record.totalCost, 0);
+
+  const usageValue = inventoryRecords
+    .filter((record) => record.type === "Usage")
+    .reduce((sum, record) => sum + record.totalCost, 0);
+
+  const returnValue = inventoryRecords
+    .filter((record) => record.type === "Return")
+    .reduce((sum, record) => sum + record.totalCost, 0);
+
+  const adjustmentValue = inventoryRecords
+    .filter((record) => record.type === "Adjustment")
+    .reduce((sum, record) => sum + record.totalCost, 0);
+
+  const netInventoryValue =
+    purchaseValue + returnValue + adjustmentValue - usageValue;
+
+  const totalRecords = inventoryRecords.length;
+  const purchaseRecords = inventoryRecords.filter(
+    (r) => r.type === "Purchase"
+  ).length;
+  const usageRecords = inventoryRecords.filter(
+    (r) => r.type === "Usage"
+  ).length;
+
   return (
     <div className="h-full space-y-8">
       {/* Modern Header */}
       <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-indigo-600">
-                {formatNumber(inventoryRecords.length)}
+                {formatNumber(totalRecords)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
                 Total Records
@@ -225,24 +253,41 @@ export default function InventoryManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                {formatCurrency(
-                  inventoryRecords.reduce(
-                    (sum, record) => sum + record.totalCost,
-                    0
-                  )
-                )}
+                {formatCurrency(netInventoryValue)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
-                Total Value
+                Net Inventory Value
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-600">
+                {formatCurrency(purchaseValue)}
+              </div>
+              <div className="text-sm text-gray-500 font-medium">
+                Purchase Value
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-red-600">
+                {formatCurrency(usageValue)}
+              </div>
+              <div className="text-sm text-gray-500 font-medium">
+                Usage Value
               </div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-600">
-                {formatNumber(
-                  inventoryRecords.filter((r) => r.type === "Purchase").length
-                )}
+                {formatNumber(purchaseRecords)}
               </div>
               <div className="text-sm text-gray-500 font-medium">Purchases</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-orange-600">
+                {formatNumber(usageRecords)}
+              </div>
+              <div className="text-sm text-gray-500 font-medium">
+                Usage Records
+              </div>
             </div>
           </div>
           <LoadingButton
