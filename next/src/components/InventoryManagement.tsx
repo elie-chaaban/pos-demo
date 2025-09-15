@@ -226,8 +226,10 @@ export default function InventoryManagement() {
     .filter((record) => record.type === "Adjustment")
     .reduce((sum, record) => sum + record.totalCost, 0);
 
-  const netInventoryValue =
-    purchaseValue + returnValue + adjustmentValue - usageValue;
+  // Calculate current inventory value based on current stock and average cost
+  const currentInventoryValue = items.reduce((sum, item) => {
+    return sum + item.stock * item.averageCost;
+  }, 0);
 
   const totalRecords = inventoryRecords.length;
   const purchaseRecords = inventoryRecords.filter(
@@ -253,10 +255,10 @@ export default function InventoryManagement() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-green-600">
-                {formatCurrency(netInventoryValue)}
+                {formatCurrency(currentInventoryValue)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
-                Net Inventory Value
+                Current Inventory Value
               </div>
             </div>
             <div className="text-center">
