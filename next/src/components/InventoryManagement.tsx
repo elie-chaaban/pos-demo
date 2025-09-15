@@ -209,35 +209,23 @@ export default function InventoryManagement() {
     );
   }
 
+  // Filter to only show Purchase transactions
+  const visibleRecords = inventoryRecords.filter(
+    (record) => record.type === "Purchase"
+  );
+
   // Calculate meaningful inventory metrics
-  const purchaseValue = inventoryRecords
-    .filter((record) => record.type === "Purchase")
-    .reduce((sum, record) => sum + record.totalCost, 0);
-
-  const usageValue = inventoryRecords
-    .filter((record) => record.type === "Usage")
-    .reduce((sum, record) => sum + record.totalCost, 0);
-
-  const returnValue = inventoryRecords
-    .filter((record) => record.type === "Return")
-    .reduce((sum, record) => sum + record.totalCost, 0);
-
-  const adjustmentValue = inventoryRecords
-    .filter((record) => record.type === "Adjustment")
-    .reduce((sum, record) => sum + record.totalCost, 0);
+  const purchaseValue = visibleRecords.reduce(
+    (sum, record) => sum + record.totalCost,
+    0
+  );
 
   // Calculate current inventory value based on current stock and average cost
   const currentInventoryValue = items.reduce((sum, item) => {
     return sum + item.stock * item.averageCost;
   }, 0);
 
-  const totalRecords = inventoryRecords.length;
-  const purchaseRecords = inventoryRecords.filter(
-    (r) => r.type === "Purchase"
-  ).length;
-  const usageRecords = inventoryRecords.filter(
-    (r) => r.type === "Usage"
-  ).length;
+  const totalRecords = visibleRecords.length;
 
   return (
     <div className="h-full space-y-8">
@@ -250,7 +238,7 @@ export default function InventoryManagement() {
                 {formatNumber(totalRecords)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
-                Total Records
+                Total Purchases
               </div>
             </div>
             <div className="text-center">
@@ -266,29 +254,15 @@ export default function InventoryManagement() {
                 {formatCurrency(purchaseValue)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
-                Purchase Value
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-red-600">
-                {formatCurrency(usageValue)}
-              </div>
-              <div className="text-sm text-gray-500 font-medium">
-                Usage Value
+                Total Purchase Value
               </div>
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-purple-600">
-                {formatNumber(purchaseRecords)}
-              </div>
-              <div className="text-sm text-gray-500 font-medium">Purchases</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-orange-600">
-                {formatNumber(usageRecords)}
+                {formatNumber(items.length)}
               </div>
               <div className="text-sm text-gray-500 font-medium">
-                Usage Records
+                Total Items
               </div>
             </div>
           </div>
@@ -299,24 +273,18 @@ export default function InventoryManagement() {
             className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
             icon={<Plus className="w-5 h-5" />}
           >
-            Add Stock
+            Add Purchase
           </LoadingButton>
         </div>
       </div>
 
       {/* Modern Inventory Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {inventoryRecords.map((record) => {
+        {visibleRecords.map((record) => {
           const getTypeGradient = (type: string) => {
             switch (type) {
               case "Purchase":
                 return "from-green-500 to-emerald-600";
-              case "Usage":
-                return "from-red-500 to-rose-600";
-              case "Return":
-                return "from-blue-500 to-cyan-600";
-              case "Adjustment":
-                return "from-yellow-500 to-orange-600";
               default:
                 return "from-gray-500 to-gray-600";
             }
@@ -398,7 +366,7 @@ export default function InventoryManagement() {
           <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
-                {editingRecord ? "Edit Inventory Record" : "Add Stock Record"}
+                {editingRecord ? "Edit Purchase Record" : "Add Purchase Record"}
               </h2>
               <button
                 onClick={closeModal}
@@ -450,9 +418,6 @@ export default function InventoryManagement() {
                     className="input-modern"
                   >
                     <option value="Purchase">Purchase</option>
-                    <option value="Usage">Usage</option>
-                    <option value="Return">Return</option>
-                    <option value="Adjustment">Adjustment</option>
                   </select>
                 </div>
               </div>
