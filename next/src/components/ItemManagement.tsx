@@ -15,6 +15,7 @@ interface Item {
   isService: boolean;
   description?: string;
   averageCost?: number;
+  reorderThreshold: number;
 }
 
 export default function ItemManagement() {
